@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CU Fest Live Scoreboard</title>
+<title>CU FEST LIVE SCOREBOARD</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
@@ -11,124 +11,184 @@
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0f172a, #020617);
-  color: white;
+  background: #f3f4f6;
 }
 
 /* HEADER */
 .header {
-  text-align: center;
-  padding: 20px;
-  font-size: 22px;
-  font-weight: 600;
-  background: linear-gradient(90deg,#8b5cf6,#22c55e);
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-/* TOP 3 PODIUM */
-.top3 {
-  display: flex;
-  justify-content: center;
-  align-items: end;
-  gap: 10px;
-  margin: 20px;
-}
-
-.podium {
-  text-align: center;
-}
-
-.podium .circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg,#8b5cf6,#22c55e);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.first .circle {
-  width: 100px;
-  height: 100px;
-  box-shadow: 0 0 20px gold;
-}
-
-.rank-label {
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-/* LIST */
-.list {
-  padding: 20px;
-}
-
-.card {
-  background: rgba(30,41,59,0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
-  transition: 0.3s;
+  padding: 15px;
+  font-weight: 600;
 }
 
-.card:hover {
-  transform: scale(1.02);
+/* TITLE */
+.title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.left {
+/* TABS */
+.tabs {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px;
 }
 
-.points {
-  font-weight: bold;
-}
-
-/* LIVE BADGE */
-.live {
-  color: #22c55e;
+.tab {
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: #e5e7eb;
   font-size: 12px;
 }
 
+.active {
+  background: linear-gradient(135deg,#7c3aed,#9333ea);
+  color: white;
+}
+
+/* TOP 3 */
+.top3 {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin: 20px;
+  gap: 20px;
+}
+
+.player {
+  text-align: center;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #7c3aed;
+  object-fit: cover;
+}
+
+.first .avatar {
+  width: 90px;
+  height: 90px;
+  border: 4px solid gold;
+}
+
+.crown {
+  font-size: 20px;
+}
+
+/* LIST HEADER */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  font-size: 12px;
+  color: gray;
+}
+
+/* LIST ITEMS */
+.card {
+  background: linear-gradient(135deg,#7c3aed,#9333ea);
+  color: white;
+  margin: 10px 20px;
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.small-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+/* BOTTOM NAV */
+.nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+
+.nav div {
+  font-size: 12px;
+  color: gray;
+}
+
+.active-nav {
+  color: #7c3aed;
+}
 </style>
 </head>
 
 <body>
 
-<div class="header">🏆 CU FEST LIVE SCOREBOARD</div>
+<div class="header">
+  <div>←</div>
+  <div class="title">Leaderboard</div>
+  <div>🔍</div>
+</div>
 
+<div class="tabs">
+  <div class="tab active">Daily</div>
+  <div class="tab">Monthly</div>
+  <div class="tab">All time</div>
+</div>
+
+<!-- TOP 3 -->
 <div class="top3" id="top3"></div>
 
-<div class="list" id="list"></div>
+<!-- LIST -->
+<div class="list-header">
+  <div>Rank</div>
+  <div>Department</div>
+  <div>Points</div>
+</div>
+
+<div id="list"></div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div>Home</div>
+  <div>Library</div>
+  <div>Quiz</div>
+  <div class="active-nav">Ranks</div>
+  <div>Profile</div>
+</div>
 
 <script>
 const API_URL = "https://sheetdb.io/api/v1/w9e5b0g16a5lw";
 
-async function fetchData() {
+function avatar(name){
+  return "https://ui-avatars.com/api/?name=" + name;
+}
+
+async function fetchData(){
   const res = await fetch(API_URL);
   const data = await res.json();
 
   const totals = {};
 
-  data.forEach(item => {
-    const dept = item.Department;
-    const points = parseInt(item.Points) || 0;
-
-    if (!totals[dept]) {
-      totals[dept] = {
-        points: 0,
-        live: item.LiveScore,
-        venue: item.Venue
-      };
+  data.forEach(item=>{
+    if(!totals[item.Department]){
+      totals[item.Department]={points:0};
     }
-
-    totals[dept].points += points;
+    totals[item.Department].points += parseInt(item.Points)||0;
   });
 
   const sorted = Object.entries(totals)
@@ -138,21 +198,23 @@ async function fetchData() {
   renderList(sorted.slice(3));
 }
 
-function renderTop3(data) {
+function renderTop3(data){
   const container = document.getElementById("top3");
-  container.innerHTML = "";
+  container.innerHTML="";
 
-  const positions = ["second","first","third"];
+  const order=[1,0,2];
 
-  [1,0,2].forEach((i,index)=>{
+  order.forEach((i,index)=>{
     if(!data[i]) return;
 
-    const div = document.createElement("div");
-    div.className = `podium ${positions[index]}`;
+    const div=document.createElement("div");
+    div.className="player "+(i===0?"first":"");
 
-    div.innerHTML = `
-      <div class="circle">${data[i][0].charAt(0)}</div>
-      <div class="rank-label">#${i+1} ${data[i][0]}</div>
+    div.innerHTML=`
+      ${i===0?'<div class="crown">👑</div>':''}
+      <img class="avatar" src="${avatar(data[i][0])}">
+      <div>#${i+1}</div>
+      <div>${data[i][0]}</div>
       <div>${data[i][1].points} pts</div>
     `;
 
@@ -160,20 +222,21 @@ function renderTop3(data) {
   });
 }
 
-function renderList(data) {
-  const container = document.getElementById("list");
-  container.innerHTML = "";
+function renderList(data){
+  const container=document.getElementById("list");
+  container.innerHTML="";
 
   data.forEach(([dept,info],index)=>{
-    const div = document.createElement("div");
-    div.className = "card";
+    const div=document.createElement("div");
+    div.className="card";
 
-    div.innerHTML = `
-      <div class="left">
-        <div>#${index+4} ${dept}</div>
-        <div class="live">Live: ${info.live} • ${info.venue}</div>
+    div.innerHTML=`
+      <div class="card-left">
+        <div>${index+4}</div>
+        <img class="small-avatar" src="${avatar(dept)}">
+        <div>${dept}</div>
       </div>
-      <div class="points">${info.points}</div>
+      <div>${info.points}</div>
     `;
 
     container.appendChild(div);
