@@ -2,48 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Leaderboard</title>
+  <title>Elite Leaderboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
     body {
-      font-family: Arial;
-      background: #0f172a;
+      background: linear-gradient(135deg, #020617, #0f172a);
       color: white;
       padding: 20px;
     }
 
     h1 {
       text-align: center;
-      color: #38bdf8;
+      font-size: 28px;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .leaderboard {
+      max-width: 600px;
+      margin: auto;
     }
 
     .card {
-      background: #1e293b;
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
       padding: 15px;
-      margin: 10px 0;
-      border-radius: 10px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      transition: 0.3s;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
-    .rank1 { border-left: 5px solid gold; }
-    .rank2 { border-left: 5px solid silver; }
-    .rank3 { border-left: 5px solid #cd7f32; }
+    .card:hover {
+      transform: scale(1.02);
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rank {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .dept {
+      font-size: 18px;
+      font-weight: 600;
+    }
 
     .live {
+      font-size: 12px;
       color: #22c55e;
-      font-size: 14px;
     }
+
+    .points {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* TOP 3 STYLING */
+    .rank1 {
+      border-left: 5px solid gold;
+      box-shadow: 0 0 10px gold;
+    }
+
+    .rank2 {
+      border-left: 5px solid silver;
+      box-shadow: 0 0 10px silver;
+    }
+
+    .rank3 {
+      border-left: 5px solid #cd7f32;
+      box-shadow: 0 0 10px #cd7f32;
+    }
+
+    /* Glow animation */
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px #22c55e; }
+      50% { box-shadow: 0 0 20px #22c55e; }
+      100% { box-shadow: 0 0 5px #22c55e; }
+    }
+
+    .live-glow {
+      animation: glow 2s infinite;
+    }
+
   </style>
 </head>
 <body>
 
-<h1>CU FEST LIVE SCORES</h1>
-<div id="leaderboard"></div>
+<h1>🏆 Live Event Leaderboard</h1>
+
+<div class="leaderboard" id="leaderboard"></div>
 
 <script>
-const API_URL = "https://sheetdb.io/api/v1/w9e5b0g16a5lw";
+const API_URL = "PASTE_YOUR_SHEETDB_API_HERE";
 
 async function fetchData() {
   const res = await fetch(API_URL);
@@ -81,11 +153,12 @@ async function fetchData() {
     if(index === 2) div.classList.add("rank3");
 
     div.innerHTML = `
-      <div>
-        <strong>#${index + 1} ${dept}</strong><br>
-        <span class="live">Live: ${info.live} | ${info.venue}</span>
+      <div class="left">
+        <div class="rank">#${index + 1}</div>
+        <div class="dept">${dept}</div>
+        <div class="live live-glow">Live: ${info.live} • ${info.venue}</div>
       </div>
-      <div>${info.points} pts</div>
+      <div class="points">${info.points} pts</div>
     `;
 
     container.appendChild(div);
@@ -93,7 +166,7 @@ async function fetchData() {
 }
 
 fetchData();
-setInterval(fetchData, 5000);
+setInterval(fetchData, 4000);
 </script>
 
 </body>
