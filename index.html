@@ -1,167 +1,244 @@
-<!-- ULTRA MINIMAL PRO SPLASH -->
-<div id="splash-screen">
-  <style>
-    #splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(120deg, #ffffff, #f8fafc, #ffffff);
-      background-size: 300% 300%;
-      animation: bgMove 12s ease infinite;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      font-family: -apple-system, BlinkMacSystemFont, 'Poppins', sans-serif;
-      overflow: hidden;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CU FEST</title>
 
-    @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 
-    /* FLOATING GLASS BLOBS */
-    .blob {
-      position: absolute;
-      width: 250px;
-      height: 250px;
-      background: rgba(255,255,255,0.4);
-      border-radius: 50%;
-      filter: blur(60px);
-      animation: moveBlob 18s infinite alternate ease-in-out;
-    }
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-    .blob:nth-child(1) { top: 10%; left: 10%; }
-    .blob:nth-child(2) { bottom: 10%; right: 10%; }
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Poppins',sans-serif;
+  background:#000;
+  display:flex;
+  justify-content:center;
+}
 
-    @keyframes moveBlob {
-      from { transform: translate(0,0); }
-      to { transform: translate(80px, -60px); }
-    }
+/* MOBILE FRAME */
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#fff;
+  position:relative;
+  overflow:hidden;
+}
 
-    .glass-box {
-      position: relative;
-      background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(0,0,0,0.05);
-      padding: 40px 30px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.06);
-      overflow: hidden;
-    }
+/* SPLASH */
+#splash{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
 
-    .logo {
-      width: 130px;
-      opacity: 0;
-      animation: fadeIn 1.5s forwards;
-    }
+.glass{
+  text-align:center;
+}
 
-    .title {
-      color: #111;
-      font-size: 22px;
-      margin-top: 15px;
-      font-weight: 600;
-    }
+.logo{width:120px;}
 
-    .subtitle {
-      color: #777;
-      font-size: 12px;
-      margin-top: 5px;
-    }
+.btn{
+  margin-top:20px;
+  padding:12px 24px;
+  border-radius:30px;
+  background:#000;
+  color:#fff;
+  border:none;
+}
 
-    .enter-btn {
-      position: relative;
-      overflow: hidden;
-      margin-top: 25px;
-      padding: 12px 26px;
-      border-radius: 30px;
-      border: 1px solid #e5e7eb;
-      background: #111;
-      color: white;
-      font-size: 13px;
-      cursor: pointer;
-    }
+/* HEADER */
+.header{
+  padding:15px;
+  text-align:center;
+  font-weight:600;
+  border-bottom:1px solid #eee;
+}
 
-    /* RIPPLE EFFECT */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      transform: scale(0);
-      background: rgba(255,255,255,0.6);
-      animation: rippleAnim 0.6s linear;
-    }
+/* CONTENT */
+.page{
+  display:none;
+  padding:15px;
+  height:calc(100vh - 120px);
+  overflow:auto;
+}
 
-    @keyframes rippleAnim {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
+.active{display:block;}
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-  </style>
+/* CARDS */
+.card{
+  background:#f5f5f5;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:12px;
+}
 
-  <!-- BLOBS -->
-  <div class="blob"></div>
-  <div class="blob"></div>
+/* LEADERBOARD */
+.rank1{background:#000;color:#fff;}
+.rank2{background:#333;color:#fff;}
+.rank3{background:#555;color:#fff;}
 
-  <div class="glass-box">
-    <img src="./CU-FEST.png" class="logo">
+/* NAVBAR */
+.nav{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  border-top:1px solid #eee;
+  display:flex;
+}
 
-    <div class="title">CU FEST</div>
-    <div class="subtitle">CU FEST LIVE SCORES AND WINNERS</div>
+.nav button{
+  flex:1;
+  border:none;
+  background:none;
+  font-size:10px;
+}
 
-    <button class="enter-btn" onclick="enterApp(event)">Enter</button>
+/* INPUT */
+input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="glass">
+    <img src="CU-FEST.png" class="logo">
+    <h3>CU FEST</h3>
+    <button class="btn" onclick="enterApp()">Enter</button>
   </div>
 </div>
 
-<!-- SOUND -->
-<audio id="introSound" src="intro.mp3" preload="auto"></audio>
+<!-- HEADER -->
+<div class="header">CU FEST</div>
+
+<!-- PAGES -->
+
+<div id="leaderboard" class="page active">
+  <h3>🏆 Leaderboard</h3>
+  <div id="board"></div>
+</div>
+
+<div id="venues" class="page">
+  <h3>📍 Venues</h3>
+  <div class="card">Main Stage</div>
+  <div class="card">Auditorium</div>
+</div>
+
+<div id="gallery" class="page">
+  <h3>📸 Photos</h3>
+  <div class="card">Add images here</div>
+</div>
+
+<div id="videos" class="page">
+  <h3>🎥 Videos</h3>
+  <div class="card">Add videos here</div>
+</div>
+
+<div id="winners" class="page">
+  <h3>🥇 Winners</h3>
+  <div class="card">Winner data</div>
+</div>
+
+<div id="admin" class="page">
+  <h3>⚙️ Admin</h3>
+  <input id="team" placeholder="Team Name">
+  <input id="score" type="number" placeholder="Score">
+  <button class="btn" onclick="addScore()">Update Score</button>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="show('leaderboard')">🏆</button>
+  <button onclick="show('venues')">📍</button>
+  <button onclick="show('gallery')">📸</button>
+  <button onclick="show('videos')">🎥</button>
+  <button onclick="show('winners')">🥇</button>
+  <button onclick="show('admin')">⚙️</button>
+</div>
+
+</div>
+
+<audio id="sound" src="intro.mp3"></audio>
 
 <script>
-  function createRipple(e) {
-    const btn = e.currentTarget;
-    const circle = document.createElement("span");
-    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-    const radius = diameter / 2;
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    circle.style.width = circle.style.height = diameter + "px";
-    circle.style.left = e.offsetX - radius + "px";
-    circle.style.top = e.offsetY - radius + "px";
-    circle.classList.add("ripple");
+/* ENTER */
+function enterApp(){
+  document.getElementById("sound").play();
+  document.getElementById("splash").style.display="none";
+  loadBoard();
+}
 
-    const ripple = btn.getElementsByClassName("ripple")[0];
-    if (ripple) {
-      ripple.remove();
-    }
+/* NAVIGATION */
+function show(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-    btn.appendChild(circle);
-  }
+/* LEADERBOARD */
+function loadBoard(){
+  db.collection("teams").onSnapshot(snapshot=>{
+    let board=document.getElementById("board");
+    board.innerHTML="";
+    let teams=[];
 
-  function enterApp(e){
-    createRipple(e);
+    snapshot.forEach(doc=>teams.push(doc.data()));
+    teams.sort((a,b)=>b.score-a.score);
 
-    const sound = document.getElementById("introSound");
-    sound.play();
+    teams.forEach((t,i)=>{
+      let cls="";
+      if(i==0) cls="rank1";
+      else if(i==1) cls="rank2";
+      else if(i==2) cls="rank3";
 
-    e.target.innerText = "Opening...";
+      board.innerHTML+=`
+        <div class="card ${cls}">
+          #${i+1} ${t.name}<br>Score: ${t.score}
+        </div>`;
+    });
+  });
+}
 
-    setTimeout(()=>{
-      const splash = document.getElementById("splash-screen");
-      splash.style.opacity = "0";
-      splash.style.transition = "0.5s";
+/* ADMIN */
+function addScore(){
+  let t=document.getElementById("team").value;
+  let s=parseInt(document.getElementById("score").value);
 
-      setTimeout(()=>{
-        splash.style.display = "none";
-      },500);
-    },800);
-  }
+  db.collection("teams").doc(t).set({
+    name:t,
+    score:s
+  });
+}
 </script>
-<!-- END --> 
+
+</body>
+</html>
