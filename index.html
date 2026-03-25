@@ -44,6 +44,7 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 }
 .sidebar.open{left:0;}
 .sidebar div{margin:15px 0;cursor:pointer;}
+
 .success{color:green;margin-top:10px;}
 </style>
 </head>
@@ -79,7 +80,7 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 </div>
 
 <div id="highlights" class="page">
-<h3>🎬 Highlights</h3>
+<h3>🎬 Event Highlights</h3>
 <div id="media"></div>
 </div>
 
@@ -106,8 +107,8 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 <div onclick="loadDashboard()">Dashboard</div>
 <div onclick="loadSection('admins')">Add Admin</div>
 <div onclick="loadSection('venues')">Add Venue</div>
-<div onclick="loadSection('media')">Highlights</div>
-<div onclick="loadSection('winners')">Winners</div>
+<div onclick="loadSection('media')">Upload Highlight</div>
+<div onclick="loadSection('winners')">Add Winner</div>
 </div>
 
 <div id="adminContent"></div>
@@ -161,7 +162,11 @@ adminContent.innerHTML="<h3>Welcome Hiten 👋</h3>";
 }
 
 /* FIREBASE */
-const firebaseConfig={apiKey:"YOUR_KEY",authDomain:"YOUR_DOMAIN",projectId:"YOUR_ID"};
+const firebaseConfig={
+  apiKey:"YOUR_KEY",
+  authDomain:"YOUR_DOMAIN",
+  projectId:"YOUR_ID"
+};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
@@ -178,7 +183,10 @@ c.innerHTML=`<input id="vname"><textarea id="vinfo"></textarea><button class="bt
 }
 
 if(type==="media"){
-c.innerHTML=`<input id="mediaUrl"><button class="btn" onclick="addMedia()">Add</button><div id="msg"></div>`;
+c.innerHTML=`
+<input type="file" id="fileInput">
+<button class="btn" onclick="uploadImage()">Upload</button>
+<div id="msg"></div>`;
 }
 
 if(type==="winners"){
@@ -188,9 +196,12 @@ c.innerHTML=`<input id="winner"><button class="btn" onclick="addWinner()">Add</b
 toggleSidebar();
 }
 
-/* ADD FUNCTIONS */
-function showMsg(){msg.innerHTML="<div class='success'>Data Added Successfully ✅</div>";}
+/* SUCCESS MESSAGE */
+function showMsg(){
+msg.innerHTML="<div class='success'>Data Added Successfully ✅</div>";
+}
 
+/* FIREBASE ADD */
 function addAdmin(){
 db.collection("admins").add({name:newAdmin.value,pass:newPass.value});
 showMsg();
@@ -201,17 +212,32 @@ db.collection("venues").add({name:vname.value,info:vinfo.value});
 showMsg();
 }
 
-function addMedia(){
-db.collection("media").add({url:mediaUrl.value});
-showMsg();
-}
-
 function addWinner(){
 db.collection("winners").add({name:winner.value});
 showMsg();
 }
 
-/* GOOGLE SHEET LEADERBOARD */
+/* 🔥 CLOUDINARY UPLOAD */
+function uploadImage(){
+const file=document.getElementById("fileInput").files[0];
+if(!file){alert("Select file");return;}
+
+const formData=new FormData();
+formData.append("file",file);
+formData.append("upload_preset","unsigned_preset"); // replace if needed
+
+fetch("https://api.cloudinary.com/v1_1/dyt6iai2c/image/upload",{
+method:"POST",
+body:formData
+})
+.then(res=>res.json())
+.then(data=>{
+db.collection("media").add({url:data.secure_url,type:"image"});
+showMsg();
+});
+}
+
+/* LEADERBOARD */
 async function loadLeaderboard(){
 const res=await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
 const data=await res.json();
