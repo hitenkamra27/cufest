@@ -1,118 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Elite Leaderboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CU Fest Live Scoreboard</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+}
 
-    body {
-      background: linear-gradient(135deg, #020617, #0f172a);
-      color: white;
-      padding: 20px;
-    }
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  background: linear-gradient(90deg,#8b5cf6,#22c55e);
+  -webkit-background-clip: text;
+  color: transparent;
+}
 
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 20px;
-      background: linear-gradient(90deg, #38bdf8, #22c55e);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
+/* TOP 3 PODIUM */
+.top3 {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: 10px;
+  margin: 20px;
+}
 
-    .leaderboard {
-      max-width: 600px;
-      margin: auto;
-    }
+.podium {
+  text-align: center;
+}
 
-    .card {
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 15px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: 0.3s;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
+.podium .circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#8b5cf6,#22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
 
-    .card:hover {
-      transform: scale(1.02);
-      background: rgba(30, 41, 59, 0.8);
-    }
+.first .circle {
+  width: 100px;
+  height: 100px;
+  box-shadow: 0 0 20px gold;
+}
 
-    .left {
-      display: flex;
-      flex-direction: column;
-    }
+.rank-label {
+  margin-top: 8px;
+  font-size: 14px;
+}
 
-    .rank {
-      font-size: 14px;
-      opacity: 0.7;
-    }
+/* LIST */
+.list {
+  padding: 20px;
+}
 
-    .dept {
-      font-size: 18px;
-      font-weight: 600;
-    }
+.card {
+  background: rgba(30,41,59,0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  transition: 0.3s;
+}
 
-    .live {
-      font-size: 12px;
-      color: #22c55e;
-    }
+.card:hover {
+  transform: scale(1.02);
+}
 
-    .points {
-      font-size: 20px;
-      font-weight: bold;
-    }
+.left {
+  display: flex;
+  flex-direction: column;
+}
 
-    /* TOP 3 STYLING */
-    .rank1 {
-      border-left: 5px solid gold;
-      box-shadow: 0 0 10px gold;
-    }
+.points {
+  font-weight: bold;
+}
 
-    .rank2 {
-      border-left: 5px solid silver;
-      box-shadow: 0 0 10px silver;
-    }
+/* LIVE BADGE */
+.live {
+  color: #22c55e;
+  font-size: 12px;
+}
 
-    .rank3 {
-      border-left: 5px solid #cd7f32;
-      box-shadow: 0 0 10px #cd7f32;
-    }
-
-    /* Glow animation */
-    @keyframes glow {
-      0% { box-shadow: 0 0 5px #22c55e; }
-      50% { box-shadow: 0 0 20px #22c55e; }
-      100% { box-shadow: 0 0 5px #22c55e; }
-    }
-
-    .live-glow {
-      animation: glow 2s infinite;
-    }
-
-  </style>
+</style>
 </head>
+
 <body>
 
-<h1>🏆 Live Event Leaderboard</h1>
+<div class="header">🏆 CU FEST LIVE SCOREBOARD</div>
 
-<div class="leaderboard" id="leaderboard"></div>
+<div class="top3" id="top3"></div>
+
+<div class="list" id="list"></div>
 
 <script>
 const API_URL = "https://sheetdb.io/api/v1/w9e5b0g16a5lw";
@@ -139,26 +132,48 @@ async function fetchData() {
   });
 
   const sorted = Object.entries(totals)
-    .sort((a, b) => b[1].points - a[1].points);
+    .sort((a,b)=>b[1].points-a[1].points);
 
-  const container = document.getElementById("leaderboard");
+  renderTop3(sorted);
+  renderList(sorted.slice(3));
+}
+
+function renderTop3(data) {
+  const container = document.getElementById("top3");
   container.innerHTML = "";
 
-  sorted.forEach(([dept, info], index) => {
+  const positions = ["second","first","third"];
+
+  [1,0,2].forEach((i,index)=>{
+    if(!data[i]) return;
+
+    const div = document.createElement("div");
+    div.className = `podium ${positions[index]}`;
+
+    div.innerHTML = `
+      <div class="circle">${data[i][0].charAt(0)}</div>
+      <div class="rank-label">#${i+1} ${data[i][0]}</div>
+      <div>${data[i][1].points} pts</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function renderList(data) {
+  const container = document.getElementById("list");
+  container.innerHTML = "";
+
+  data.forEach(([dept,info],index)=>{
     const div = document.createElement("div");
     div.className = "card";
 
-    if(index === 0) div.classList.add("rank1");
-    if(index === 1) div.classList.add("rank2");
-    if(index === 2) div.classList.add("rank3");
-
     div.innerHTML = `
       <div class="left">
-        <div class="rank">#${index + 1}</div>
-        <div class="dept">${dept}</div>
-        <div class="live live-glow">Live: ${info.live} • ${info.venue}</div>
+        <div>#${index+4} ${dept}</div>
+        <div class="live">Live: ${info.live} • ${info.venue}</div>
       </div>
-      <div class="points">${info.points} pts</div>
+      <div class="points">${info.points}</div>
     `;
 
     container.appendChild(div);
@@ -166,7 +181,7 @@ async function fetchData() {
 }
 
 fetchData();
-setInterval(fetchData, 4000);
+setInterval(fetchData,4000);
 </script>
 
 </body>
