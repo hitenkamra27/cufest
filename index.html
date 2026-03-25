@@ -14,41 +14,17 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#000;display:flex;justify-content:center;font-family:'Poppins';}
 
-.app{
-  width:100%;
-  max-width:420px;
-  height:100vh;
-  background:#fff;
-  position:relative;
-  overflow:hidden;
-}
+.app{width:100%;max-width:420px;height:100vh;background:#fff;position:relative;overflow:hidden;}
 
-/* SPLASH */
 #splash{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  z-index:20;
+  position:absolute;width:100%;height:100%;background:#fff;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;
 }
-
 .logo{width:120px;}
-
-.loader{
-  width:150px;height:4px;background:#ddd;margin-top:20px;
-  border-radius:10px;overflow:hidden;
-}
-.loader span{
-  display:block;height:100%;width:0%;background:#000;
-  animation:load 2.5s forwards;
-}
+.loader{width:150px;height:4px;background:#ddd;margin-top:20px;border-radius:10px;overflow:hidden;}
+.loader span{display:block;height:100%;width:0;background:#000;animation:load 2s forwards;}
 @keyframes load{to{width:100%;}}
 
-/* HEADER */
 .header{padding:15px;text-align:center;font-weight:600;border-bottom:1px solid #eee;}
 
 .page{display:none;padding:15px;height:calc(100vh - 120px);overflow:auto;}
@@ -56,21 +32,11 @@ body{background:#000;display:flex;justify-content:center;font-family:'Poppins';}
 
 .card{background:#f5f5f5;padding:15px;margin-bottom:10px;border-radius:12px;}
 
-.nav{
-  position:absolute;bottom:0;width:100%;height:60px;
-  display:flex;background:#fff;border-top:1px solid #eee;
-}
+.nav{position:absolute;bottom:0;width:100%;height:60px;display:flex;background:#fff;border-top:1px solid #eee;}
 .nav button{flex:1;border:none;background:none;}
 
-input,textarea{
-  width:100%;padding:10px;margin:5px 0;
-  border-radius:8px;border:1px solid #ddd;
-}
-
-.btn{
-  padding:10px;background:#000;color:#fff;
-  border:none;border-radius:8px;margin-top:10px;width:100%;
-}
+input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ddd;}
+.btn{padding:10px;background:#000;color:#fff;border:none;border-radius:8px;margin-top:10px;width:100%;}
 
 .sidebar{
   position:absolute;left:-100%;top:0;width:70%;height:100%;
@@ -78,6 +44,7 @@ input,textarea{
 }
 .sidebar.open{left:0;}
 .sidebar div{margin:15px 0;cursor:pointer;}
+.success{color:green;margin-top:10px;}
 </style>
 </head>
 
@@ -87,41 +54,64 @@ input,textarea{
 
 <!-- SPLASH -->
 <div id="splash">
-  <img src="logo.png" class="logo">
-  <h2>CU FEST</h2>
-  <div class="loader"><span></span></div>
+<img src="logo.png" class="logo">
+<h2>CU FEST</h2>
+<div class="loader"><span></span></div>
 </div>
 
 <div class="header">CU FEST</div>
 
 <!-- PAGES -->
+
 <div id="leaderboard" class="page active">
 <h3>🏆 Leaderboard</h3>
 <div id="board"></div>
 </div>
 
-<div id="admin" class="page">
-
-<!-- LOGIN -->
-<div id="loginBox">
-  <input id="adminUser" placeholder="Admin Name">
-  <input id="adminPass" type="password" placeholder="Password">
-  <button class="btn" onclick="handleLogin()">Login</button>
+<div id="venues" class="page">
+<h3>📍 Venues</h3>
+<div id="venueList"></div>
 </div>
 
-<!-- ADMIN PANEL -->
+<div id="venueDetail" class="page">
+<h3 id="venueTitle"></h3>
+<p id="venueInfo"></p>
+</div>
+
+<div id="highlights" class="page">
+<h3>🎬 Highlights</h3>
+<div id="media"></div>
+</div>
+
+<div id="winners" class="page">
+<h3>🥇 Winners</h3>
+<div id="winnerList"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="page">
+
+<div id="loginBox">
+<input id="adminUser" placeholder="Admin Name">
+<input id="adminPass" type="password" placeholder="Password">
+<button class="btn" onclick="handleLogin()">Login</button>
+</div>
+
 <div id="adminPanel" style="display:none;">
+
 <button class="btn" onclick="toggleSidebar()">☰ Menu</button>
+<button class="btn" onclick="logout()">Sign Out</button>
 
 <div id="adminSidebar" class="sidebar">
-  <div onclick="loadDashboard()">Dashboard</div>
-  <div onclick="loadSection('admins')">Add Admin</div>
-  <div onclick="loadSection('venues')">Venues</div>
-  <div onclick="loadSection('media')">Highlights</div>
-  <div onclick="loadSection('winners')">Winners</div>
+<div onclick="loadDashboard()">Dashboard</div>
+<div onclick="loadSection('admins')">Add Admin</div>
+<div onclick="loadSection('venues')">Add Venue</div>
+<div onclick="loadSection('media')">Highlights</div>
+<div onclick="loadSection('winners')">Winners</div>
 </div>
 
 <div id="adminContent"></div>
+
 </div>
 
 </div>
@@ -129,6 +119,9 @@ input,textarea{
 <!-- NAV -->
 <div class="nav">
 <button onclick="show('leaderboard')">🏆</button>
+<button onclick="show('venues')">📍</button>
+<button onclick="show('highlights')">🎬</button>
+<button onclick="show('winners')">🥇</button>
 <button onclick="show('admin')">⚙️</button>
 </div>
 
@@ -137,84 +130,131 @@ input,textarea{
 <script>
 
 /* SPLASH */
-setTimeout(()=>{document.getElementById("splash").style.display="none";},2000);
+setTimeout(()=>{splash.style.display="none";},2000);
 
 /* NAV */
 function show(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
-/* ✅ FIXED LOGIN */
+/* LOGIN */
 function handleLogin(){
-  const user = document.getElementById("adminUser").value.trim();
-  const pass = document.getElementById("adminPass").value.trim();
+if(adminUser.value==="Hiten" && adminPass.value==="1234"){
+loginBox.style.display="none";
+adminPanel.style.display="block";
+loadDashboard();
+}else alert("Wrong credentials");
+}
 
-  if(user === "Hiten" && pass === "1234"){
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    loadDashboard();
-  } else {
-    alert("Invalid credentials");
-  }
+function logout(){
+adminPanel.style.display="none";
+loginBox.style.display="block";
 }
 
 /* SIDEBAR */
-function toggleSidebar(){
-  document.getElementById("adminSidebar").classList.toggle("open");
-}
+function toggleSidebar(){adminSidebar.classList.toggle("open");}
 
 /* DASHBOARD */
 function loadDashboard(){
-  document.getElementById("adminContent").innerHTML = `
-    <h3>Welcome Hiten 👋</h3>
-    <p>Admin panel is working correctly.</p>
-  `;
+adminContent.innerHTML="<h3>Welcome Hiten 👋</h3>";
 }
 
-/* SECTIONS */
+/* FIREBASE */
+const firebaseConfig={apiKey:"YOUR_KEY",authDomain:"YOUR_DOMAIN",projectId:"YOUR_ID"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
+/* ADMIN SECTIONS */
 function loadSection(type){
-  let c=document.getElementById("adminContent");
+let c=adminContent;
 
-  if(type==="admins"){
-    c.innerHTML=`<input placeholder="Name"><input placeholder="Password"><button class="btn">Add</button>`;
-  }
-
-  if(type==="venues"){
-    c.innerHTML=`<input placeholder="Venue"><textarea placeholder="Details"></textarea><button class="btn">Add</button>`;
-  }
-
-  if(type==="media"){
-    c.innerHTML=`<input placeholder="Image URL"><button class="btn">Add</button>`;
-  }
-
-  if(type==="winners"){
-    c.innerHTML=`<input placeholder="Winner"><button class="btn">Add</button>`;
-  }
-
-  toggleSidebar();
+if(type==="admins"){
+c.innerHTML=`<input id="newAdmin"><input id="newPass"><button class="btn" onclick="addAdmin()">Add</button><div id="msg"></div>`;
 }
 
-/* 🔥 GOOGLE SHEET LEADERBOARD */
+if(type==="venues"){
+c.innerHTML=`<input id="vname"><textarea id="vinfo"></textarea><button class="btn" onclick="addVenue()">Add</button><div id="msg"></div>`;
+}
+
+if(type==="media"){
+c.innerHTML=`<input id="mediaUrl"><button class="btn" onclick="addMedia()">Add</button><div id="msg"></div>`;
+}
+
+if(type==="winners"){
+c.innerHTML=`<input id="winner"><button class="btn" onclick="addWinner()">Add</button><div id="msg"></div>`;
+}
+
+toggleSidebar();
+}
+
+/* ADD FUNCTIONS */
+function showMsg(){msg.innerHTML="<div class='success'>Data Added Successfully ✅</div>";}
+
+function addAdmin(){
+db.collection("admins").add({name:newAdmin.value,pass:newPass.value});
+showMsg();
+}
+
+function addVenue(){
+db.collection("venues").add({name:vname.value,info:vinfo.value});
+showMsg();
+}
+
+function addMedia(){
+db.collection("media").add({url:mediaUrl.value});
+showMsg();
+}
+
+function addWinner(){
+db.collection("winners").add({name:winner.value});
+showMsg();
+}
+
+/* GOOGLE SHEET LEADERBOARD */
 async function loadLeaderboard(){
-  const res = await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
-  const data = await res.json();
+const res=await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
+const data=await res.json();
 
-  const board = document.getElementById("board");
-  board.innerHTML="";
+board.innerHTML="";
+data.sort((a,b)=>b.score-a.score);
 
-  data.sort((a,b)=>parseInt(b.score)-parseInt(a.score));
-
-  data.forEach((t,i)=>{
-    board.innerHTML += `
-      <div class="card">
-        #${i+1} ${t.name}<br>Score: ${t.score}
-      </div>`;
-  });
+data.forEach((t,i)=>{
+board.innerHTML+=`<div class="card">#${i+1} ${t.name}<br>${t.score}</div>`;
+});
 }
-
 setInterval(loadLeaderboard,3000);
 loadLeaderboard();
+
+/* LOAD DATA */
+
+db.collection("venues").onSnapshot(s=>{
+venueList.innerHTML="";
+s.forEach(d=>{
+let v=d.data();
+venueList.innerHTML+=`<div class="card" onclick="openVenue('${v.name}','${v.info}')">${v.name}</div>`;
+});
+});
+
+function openVenue(n,i){
+show('venueDetail');
+venueTitle.innerText=n;
+venueInfo.innerText=i;
+}
+
+db.collection("media").onSnapshot(s=>{
+media.innerHTML="";
+s.forEach(d=>{
+media.innerHTML+=`<div class="card"><img src="${d.data().url}" width="100%"></div>`;
+});
+});
+
+db.collection("winners").onSnapshot(s=>{
+winnerList.innerHTML="";
+s.forEach(d=>{
+winnerList.innerHTML+=`<div class="card">${d.data().name}</div>`;
+});
+});
 
 </script>
 
