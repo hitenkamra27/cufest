@@ -1,251 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CU FEST LIVE SCOREBOARD</title>
+<!-- ULTRA MINIMAL PRO SPLASH -->
+<div id="splash-screen">
+  <style>
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(120deg, #ffffff, #f8fafc, #ffffff);
+      background-size: 300% 300%;
+      animation: bgMove 12s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Poppins', sans-serif;
+      overflow: hidden;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: #f3f4f6;
-}
+    /* FLOATING GLASS BLOBS */
+    .blob {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: moveBlob 18s infinite alternate ease-in-out;
+    }
 
-/* HEADER */
-.header {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-  font-weight: 600;
-}
+    .blob:nth-child(1) { top: 10%; left: 10%; }
+    .blob:nth-child(2) { bottom: 10%; right: 10%; }
 
-/* TITLE */
-.title {
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-}
+    @keyframes moveBlob {
+      from { transform: translate(0,0); }
+      to { transform: translate(80px, -60px); }
+    }
 
-/* TABS */
-.tabs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px;
-}
+    .glass-box {
+      position: relative;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 40px 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
 
-.tab {
-  padding: 8px 18px;
-  border-radius: 20px;
-  background: #e5e7eb;
-  font-size: 12px;
-}
+    .logo {
+      width: 130px;
+      opacity: 0;
+      animation: fadeIn 1.2s forwards;
+    }
 
-.active {
-  background: linear-gradient(135deg,#7c3aed,#9333ea);
-  color: white;
-}
+    .title {
+      color: #111;
+      font-size: 22px;
+      margin-top: 15px;
+      font-weight: 600;
+    }
 
-/* TOP 3 */
-.top3 {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  margin: 20px;
-  gap: 20px;
-}
+    .subtitle {
+      color: #777;
+      font-size: 12px;
+      margin-top: 5px;
+    }
 
-.player {
-  text-align: center;
-}
+    .enter-btn {
+      position: relative;
+      overflow: hidden;
+      margin-top: 25px;
+      padding: 12px 26px;
+      border-radius: 30px;
+      border: 1px solid #e5e7eb;
+      background: #111;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
 
-.avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 3px solid #7c3aed;
-  object-fit: cover;
-}
+    /* RIPPLE EFFECT */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      background: rgba(255,255,255,0.6);
+      animation: rippleAnim 0.6s linear;
+    }
 
-.first .avatar {
-  width: 90px;
-  height: 90px;
-  border: 4px solid gold;
-}
+    @keyframes rippleAnim {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
 
-.crown {
-  font-size: 20px;
-}
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
 
-/* LIST HEADER */
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
-  font-size: 12px;
-  color: gray;
-}
+  <!-- BLOBS -->
+  <div class="blob"></div>
+  <div class="blob"></div>
 
-/* LIST ITEMS */
-.card {
-  background: linear-gradient(135deg,#7c3aed,#9333ea);
-  color: white;
-  margin: 10px 20px;
-  padding: 12px;
-  border-radius: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  <div class="glass-box">
+    <img src="./logo.png" class="logo">
 
-.card-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    <div class="title">CU FEST</div>
+    <div class="subtitle">CU FEST LIVE SCORES AND WINNERS</div>
 
-.small-avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-}
-
-/* BOTTOM NAV */
-.nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: white;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #ddd;
-}
-
-.nav div {
-  font-size: 12px;
-  color: gray;
-}
-
-.active-nav {
-  color: #7c3aed;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  <div>←</div>
-  <div class="title">Leaderboard</div>
-  <div>🔍</div>
+    <button class="enter-btn" onclick="enterApp(event)">Enter</button>
+  </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active">Daily</div>
-  <div class="tab">Monthly</div>
-  <div class="tab">All time</div>
-</div>
-
-<!-- TOP 3 -->
-<div class="top3" id="top3"></div>
-
-<!-- LIST -->
-<div class="list-header">
-  <div>Rank</div>
-  <div>Department</div>
-  <div>Points</div>
-</div>
-
-<div id="list"></div>
-
-<!-- BOTTOM NAV -->
-<div class="nav">
-  <div>Home</div>
-  <div>Library</div>
-  <div>Quiz</div>
-  <div class="active-nav">Ranks</div>
-  <div>Profile</div>
-</div>
+<!-- SOUND -->
+<audio id="introSound" src="intro.mp3" preload="auto"></audio>
 
 <script>
-const API_URL = "https://sheetdb.io/api/v1/w9e5b0g16a5lw";
+  function createRipple(e) {
+    const btn = e.currentTarget;
+    const circle = document.createElement("span");
+    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+    const radius = diameter / 2;
 
-function avatar(name){
-  return "https://ui-avatars.com/api/?name=" + name;
-}
+    circle.style.width = circle.style.height = diameter + "px";
+    circle.style.left = e.offsetX - radius + "px";
+    circle.style.top = e.offsetY - radius + "px";
+    circle.classList.add("ripple");
 
-async function fetchData(){
-  const res = await fetch(API_URL);
-  const data = await res.json();
-
-  const totals = {};
-
-  data.forEach(item=>{
-    if(!totals[item.Department]){
-      totals[item.Department]={points:0};
+    const ripple = btn.getElementsByClassName("ripple")[0];
+    if (ripple) {
+      ripple.remove();
     }
-    totals[item.Department].points += parseInt(item.Points)||0;
-  });
 
-  const sorted = Object.entries(totals)
-    .sort((a,b)=>b[1].points-a[1].points);
+    btn.appendChild(circle);
+  }
 
-  renderTop3(sorted);
-  renderList(sorted.slice(3));
-}
+  function enterApp(e){
+    createRipple(e);
 
-function renderTop3(data){
-  const container = document.getElementById("top3");
-  container.innerHTML="";
+    const sound = document.getElementById("introSound");
+    sound.play();
 
-  const order=[1,0,2];
+    e.target.innerText = "Opening...";
 
-  order.forEach((i,index)=>{
-    if(!data[i]) return;
+    setTimeout(()=>{
+      const splash = document.getElementById("splash-screen");
+      splash.style.opacity = "0";
+      splash.style.transition = "0.5s";
 
-    const div=document.createElement("div");
-    div.className="player "+(i===0?"first":"");
-
-    div.innerHTML=`
-      ${i===0?'<div class="crown">👑</div>':''}
-      <img class="avatar" src="${avatar(data[i][0])}">
-      <div>#${i+1}</div>
-      <div>${data[i][0]}</div>
-      <div>${data[i][1].points} pts</div>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-function renderList(data){
-  const container=document.getElementById("list");
-  container.innerHTML="";
-
-  data.forEach(([dept,info],index)=>{
-    const div=document.createElement("div");
-    div.className="card";
-
-    div.innerHTML=`
-      <div class="card-left">
-        <div>${index+4}</div>
-        <img class="small-avatar" src="${avatar(dept)}">
-        <div>${dept}</div>
-      </div>
-      <div>${info.points}</div>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-fetchData();
-setInterval(fetchData,4000);
+      setTimeout(()=>{
+        splash.style.display = "none";
+      },500);
+    },800);
+  }
 </script>
-
-</body>
-</html>
+<!-- END -->
