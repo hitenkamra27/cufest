@@ -12,14 +12,8 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{
-  background:#000;
-  display:flex;
-  justify-content:center;
-  font-family:'Poppins',sans-serif;
-}
+body{background:#000;display:flex;justify-content:center;font-family:'Poppins';}
 
-/* MOBILE FRAME */
 .app{
   width:100%;
   max-width:420px;
@@ -29,94 +23,57 @@ body{
   overflow:hidden;
 }
 
-/* HEADER */
-.header{
-  padding:15px;
-  text-align:center;
-  font-weight:600;
-  border-bottom:1px solid #eee;
+/* SPLASH */
+#splash{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:20;
 }
+.logo{width:120px;}
+.btn{padding:12px;background:#000;color:#fff;border:none;border-radius:8px;margin-top:20px;width:80%;}
+
+/* HEADER */
+.header{padding:15px;text-align:center;font-weight:600;border-bottom:1px solid #eee;}
 
 /* PAGES */
-.page{
-  display:none;
-  padding:15px;
-  height:calc(100vh - 120px);
-  overflow:auto;
-}
+.page{display:none;padding:15px;height:calc(100vh - 120px);overflow:auto;}
 .active{display:block;}
 
 /* CARD */
-.card{
-  background:#f5f5f5;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:12px;
-}
+.card{background:#f5f5f5;padding:15px;margin-bottom:10px;border-radius:12px;}
 
 /* NAV */
 .nav{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  height:60px;
-  background:#fff;
-  display:flex;
-  border-top:1px solid #eee;
+  position:absolute;bottom:0;width:100%;height:60px;
+  display:flex;background:#fff;border-top:1px solid #eee;
 }
-.nav button{
-  flex:1;
-  border:none;
-  background:none;
-}
-
-/* INPUT */
-input, textarea{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border-radius:8px;
-  border:1px solid #ddd;
-}
-
-/* BUTTON */
-.btn{
-  padding:10px;
-  background:#000;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  margin-top:10px;
-  width:100%;
-}
+.nav button{flex:1;border:none;background:none;}
 
 /* ADMIN SIDEBAR */
 .sidebar{
-  position:absolute;
-  top:0;
-  left:0;
-  width:70%;
-  height:100%;
-  background:#111;
-  color:#fff;
-  padding:20px;
-  display:none;
-  z-index:5;
+  position:absolute;left:-100%;top:0;width:70%;height:100%;
+  background:#111;color:#fff;padding:20px;transition:0.3s;
+  z-index:10;
 }
-.sidebar div{
-  margin:15px 0;
-  cursor:pointer;
+.sidebar.open{left:0;}
+.sidebar div{margin:15px 0;cursor:pointer;}
+
+.menu-btn{
+  background:none;border:none;font-size:20px;
 }
 
 /* LOGIN */
-#login{
-  display:flex;
-  height:100%;
-  justify-content:center;
-  align-items:center;
-}
-.login-box{
-  width:80%;
+#login{display:flex;height:100%;justify-content:center;align-items:center;}
+.login-box{width:80%;}
+input,textarea{
+  width:100%;padding:10px;margin:5px 0;
+  border-radius:8px;border:1px solid #ddd;
 }
 </style>
 </head>
@@ -125,7 +82,27 @@ input, textarea{
 
 <div class="app">
 
-<div class="header">CU FEST</div>
+<!-- SPLASH -->
+<div id="splash">
+  <img src="logo.png" class="logo">
+  <h2>CU FEST</h2>
+  <button class="btn" onclick="enterApp()">Enter</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  CU FEST
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+  <div onclick="adminSection('dashboard')">Dashboard</div>
+  <div onclick="adminSection('venues')">Venues</div>
+  <div onclick="adminSection('media')">Highlights</div>
+  <div onclick="adminSection('scores')">Scores</div>
+  <div onclick="adminSection('winners')">Winners</div>
+</div>
 
 <!-- USER PAGES -->
 
@@ -145,7 +122,7 @@ input, textarea{
 </div>
 
 <div id="highlights" class="page">
-<h3>🎬 Event Highlights</h3>
+<h3>🎬 Highlights</h3>
 <div id="media"></div>
 </div>
 
@@ -154,9 +131,9 @@ input, textarea{
 <div id="winnerList"></div>
 </div>
 
-<!-- ADMIN LOGIN -->
-
+<!-- ADMIN -->
 <div id="admin" class="page">
+
 <div id="login">
   <div class="login-box">
     <input id="adminUser" placeholder="Admin Name">
@@ -165,21 +142,10 @@ input, textarea{
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
 <div id="adminPanel" style="display:none;">
-<button onclick="toggleSidebar()">☰ Menu</button>
-
-<div class="sidebar" id="sidebar">
-  <div onclick="adminSection('admins')">Add Admin</div>
-  <div onclick="adminSection('venues')">Manage Venues</div>
-  <div onclick="adminSection('media')">Event Highlights</div>
-  <div onclick="adminSection('scores')">Live Score</div>
-  <div onclick="adminSection('winners')">Winners</div>
+  <div id="adminContent"></div>
 </div>
 
-<div id="adminContent"></div>
-
-</div>
 </div>
 
 <!-- NAV -->
@@ -195,13 +161,18 @@ input, textarea{
 
 <script>
 /* FIREBASE */
-const firebaseConfig = {
+const firebaseConfig={
   apiKey:"YOUR_KEY",
   authDomain:"YOUR_DOMAIN",
   projectId:"YOUR_ID"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db=firebase.firestore();
+
+/* SPLASH */
+function enterApp(){
+  document.getElementById("splash").style.display="none";
+}
 
 /* NAV */
 function show(id){
@@ -211,12 +182,13 @@ function show(id){
 
 /* LOGIN */
 function login(){
-  let u=document.getElementById("adminUser").value;
-  let p=document.getElementById("adminPass").value;
+  let u=adminUser.value;
+  let p=adminPass.value;
 
   if(u==="Hiten" && p==="1234"){
-    document.getElementById("login").style.display="none";
-    document.getElementById("adminPanel").style.display="block";
+    login.style.display="none";
+    adminPanel.style.display="block";
+    adminSection('dashboard'); // DEFAULT VIEW
   }else{
     alert("Wrong credentials");
   }
@@ -224,102 +196,82 @@ function login(){
 
 /* SIDEBAR */
 function toggleSidebar(){
-  let s=document.getElementById("sidebar");
-  s.style.display = s.style.display=="block"?"none":"block";
+  document.getElementById("sidebar").classList.toggle("open");
 }
 
 /* ADMIN SECTIONS */
 function adminSection(type){
   let c=document.getElementById("adminContent");
 
-  if(type==="admins"){
-    c.innerHTML=`
-      <input placeholder="New Admin Name">
-      <input placeholder="Password">
-      <button class="btn">Add Admin</button>
-    `;
+  if(type==="dashboard"){
+    c.innerHTML=`<h3>Welcome Hiten 👋</h3><p>Manage your fest from here.</p>`;
   }
 
   if(type==="venues"){
     c.innerHTML=`
       <input id="vname" placeholder="Venue Name">
       <textarea id="vinfo" placeholder="Details"></textarea>
-      <button class="btn" onclick="addVenue()">Add Venue</button>
-    `;
+      <button class="btn" onclick="addVenue()">Add Venue</button>`;
   }
 
   if(type==="media"){
     c.innerHTML=`
-      <input id="mediaUrl" placeholder="Image/Video URL">
-      <button class="btn" onclick="addMedia()">Add</button>
-    `;
+      <input id="mediaUrl" placeholder="Image URL">
+      <button class="btn" onclick="addMedia()">Add</button>`;
   }
 
   if(type==="scores"){
     c.innerHTML=`
       <input id="team" placeholder="Team Name">
       <input id="score" type="number" placeholder="Score">
-      <button class="btn" onclick="addScore()">Update</button>
-    `;
+      <button class="btn" onclick="addScore()">Update</button>`;
   }
 
   if(type==="winners"){
     c.innerHTML=`
       <input id="winner" placeholder="Winner Name">
-      <button class="btn" onclick="addWinner()">Add</button>
-    `;
+      <button class="btn" onclick="addWinner()">Add</button>`;
   }
+
+  toggleSidebar();
 }
 
 /* FIREBASE FUNCTIONS */
-
 function addVenue(){
-  db.collection("venues").add({
-    name:vname.value,
-    info:vinfo.value
-  });
+  db.collection("venues").add({name:vname.value,info:vinfo.value});
 }
 
 function addMedia(){
-  db.collection("media").add({
-    url:mediaUrl.value
-  });
+  db.collection("media").add({url:mediaUrl.value});
 }
 
 function addScore(){
-  db.collection("teams").doc(team.value).set({
-    name:team.value,
-    score:parseInt(score.value)
-  });
+  db.collection("teams").doc(team.value).set({name:team.value,score:parseInt(score.value)});
 }
 
 function addWinner(){
-  db.collection("winners").add({
-    name:winner.value
-  });
+  db.collection("winners").add({name:winner.value});
 }
 
 /* LOAD DATA */
 
 // leaderboard
 db.collection("teams").onSnapshot(s=>{
-  let board=document.getElementById("board");
-  board.innerHTML="";
+  let b=board; b.innerHTML="";
   let arr=[];
   s.forEach(d=>arr.push(d.data()));
   arr.sort((a,b)=>b.score-a.score);
   arr.forEach((t,i)=>{
-    board.innerHTML+=`<div class="card">#${i+1} ${t.name} - ${t.score}</div>`;
+    b.innerHTML+=`<div class="card">#${i+1} ${t.name} - ${t.score}</div>`;
   });
 });
 
 // venues
 db.collection("venues").onSnapshot(s=>{
-  let list=document.getElementById("venueList");
-  list.innerHTML="";
-  s.forEach(doc=>{
-    let v=doc.data();
-    list.innerHTML+=`<div class="card" onclick="openVenue('${v.name}','${v.info}')">${v.name}</div>`;
+  let v=venueList; v.innerHTML="";
+  s.forEach(d=>{
+    let data=d.data();
+    v.innerHTML+=`<div class="card" onclick="openVenue('${data.name}','${data.info}')">${data.name}</div>`;
   });
 });
 
@@ -331,18 +283,15 @@ function openVenue(name,info){
 
 // media
 db.collection("media").onSnapshot(s=>{
-  let m=document.getElementById("media");
-  m.innerHTML="";
+  let m=media; m.innerHTML="";
   s.forEach(d=>{
-    let url=d.data().url;
-    m.innerHTML+=`<div class="card"><img src="${url}" width="100%"></div>`;
+    m.innerHTML+=`<div class="card"><img src="${d.data().url}" width="100%"></div>`;
   });
 });
 
 // winners
 db.collection("winners").onSnapshot(s=>{
-  let w=document.getElementById("winnerList");
-  w.innerHTML="";
+  let w=winnerList; w.innerHTML="";
   s.forEach(d=>{
     w.innerHTML+=`<div class="card">${d.data().name}</div>`;
   });
