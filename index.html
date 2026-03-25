@@ -219,22 +219,45 @@ showMsg();
 
 /* 🔥 CLOUDINARY UPLOAD */
 function uploadImage(){
-const file=document.getElementById("fileInput").files[0];
-if(!file){alert("Select file");return;}
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
 
-const formData=new FormData();
-formData.append("file",file);
-formData.append("upload_preset","unsigned_preset"); // replace if needed
+  if(!file){
+    alert("Please select an image first");
+    return;
+  }
 
-fetch("https://api.cloudinary.com/v1_1/dyt6iai2c/image/upload",{
-method:"POST",
-body:formData
-})
-.then(res=>res.json())
-.then(data=>{
-db.collection("media").add({url:data.secure_url,type:"image"});
-showMsg();
-});
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "cu_fest_upload"); // 🔥 REPLACE WITH YOUR PRESET
+
+  fetch("https://api.cloudinary.com/v1_1/dyt6iai2c/image/upload", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Cloudinary Response:", data);
+
+    if(data.secure_url){
+      // SAVE IN FIREBASE
+      db.collection("media").add({
+        url: data.secure_url,
+        type: "image"
+      });
+
+      document.getElementById("msg").innerHTML =
+        "<div class='success'>Uploaded Successfully ✅</div>";
+
+      fileInput.value = ""; // reset
+    } else {
+      alert("Upload failed. Check preset.");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Upload error. Check console.");
+  });
 }
 
 /* LEADERBOARD */
