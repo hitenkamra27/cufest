@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CU FEST</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
@@ -13,10 +13,10 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
-  font-family:'Poppins',sans-serif;
   background:#000;
   display:flex;
   justify-content:center;
+  font-family:'Poppins',sans-serif;
 }
 
 /* MOBILE FRAME */
@@ -29,33 +29,6 @@ body{
   overflow:hidden;
 }
 
-/* SPLASH */
-#splash{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:10;
-}
-
-.glass{
-  text-align:center;
-}
-
-.logo{width:120px;}
-
-.btn{
-  margin-top:20px;
-  padding:12px 24px;
-  border-radius:30px;
-  background:#000;
-  color:#fff;
-  border:none;
-}
-
 /* HEADER */
 .header{
   padding:15px;
@@ -64,17 +37,16 @@ body{
   border-bottom:1px solid #eee;
 }
 
-/* CONTENT */
+/* PAGES */
 .page{
   display:none;
   padding:15px;
   height:calc(100vh - 120px);
   overflow:auto;
 }
-
 .active{display:block;}
 
-/* CARDS */
+/* CARD */
 .card{
   background:#f5f5f5;
   padding:15px;
@@ -82,36 +54,69 @@ body{
   border-radius:12px;
 }
 
-/* LEADERBOARD */
-.rank1{background:#000;color:#fff;}
-.rank2{background:#333;color:#fff;}
-.rank3{background:#555;color:#fff;}
-
-/* NAVBAR */
+/* NAV */
 .nav{
   position:absolute;
   bottom:0;
   width:100%;
   height:60px;
   background:#fff;
-  border-top:1px solid #eee;
   display:flex;
+  border-top:1px solid #eee;
 }
-
 .nav button{
   flex:1;
   border:none;
   background:none;
-  font-size:10px;
 }
 
 /* INPUT */
-input{
+input, textarea{
   width:100%;
   padding:10px;
   margin:5px 0;
-  border:1px solid #ddd;
   border-radius:8px;
+  border:1px solid #ddd;
+}
+
+/* BUTTON */
+.btn{
+  padding:10px;
+  background:#000;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  width:100%;
+}
+
+/* ADMIN SIDEBAR */
+.sidebar{
+  position:absolute;
+  top:0;
+  left:0;
+  width:70%;
+  height:100%;
+  background:#111;
+  color:#fff;
+  padding:20px;
+  display:none;
+  z-index:5;
+}
+.sidebar div{
+  margin:15px 0;
+  cursor:pointer;
+}
+
+/* LOGIN */
+#login{
+  display:flex;
+  height:100%;
+  justify-content:center;
+  align-items:center;
+}
+.login-box{
+  width:80%;
 }
 </style>
 </head>
@@ -120,124 +125,228 @@ input{
 
 <div class="app">
 
-<!-- SPLASH -->
-<div id="splash">
-  <div class="glass">
-    <img src="CU-FEST.png" class="logo">
-    <h3>CU FEST</h3>
-    <button class="btn" onclick="enterApp()">Enter</button>
-  </div>
-</div>
-
-<!-- HEADER -->
 <div class="header">CU FEST</div>
 
-<!-- PAGES -->
+<!-- USER PAGES -->
 
 <div id="leaderboard" class="page active">
-  <h3>🏆 Leaderboard</h3>
-  <div id="board"></div>
+<h3>🏆 Leaderboard</h3>
+<div id="board"></div>
 </div>
 
 <div id="venues" class="page">
-  <h3>📍 Venues</h3>
-  <div class="card">Main Stage</div>
-  <div class="card">Auditorium</div>
+<h3>📍 Venues</h3>
+<div id="venueList"></div>
 </div>
 
-<div id="gallery" class="page">
-  <h3>📸 Photos</h3>
-  <div class="card">Add images here</div>
+<div id="venueDetail" class="page">
+<h3 id="venueTitle"></h3>
+<p id="venueInfo"></p>
 </div>
 
-<div id="videos" class="page">
-  <h3>🎥 Videos</h3>
-  <div class="card">Add videos here</div>
+<div id="highlights" class="page">
+<h3>🎬 Event Highlights</h3>
+<div id="media"></div>
 </div>
 
 <div id="winners" class="page">
-  <h3>🥇 Winners</h3>
-  <div class="card">Winner data</div>
+<h3>🥇 Winners</h3>
+<div id="winnerList"></div>
 </div>
 
+<!-- ADMIN LOGIN -->
+
 <div id="admin" class="page">
-  <h3>⚙️ Admin</h3>
-  <input id="team" placeholder="Team Name">
-  <input id="score" type="number" placeholder="Score">
-  <button class="btn" onclick="addScore()">Update Score</button>
+<div id="login">
+  <div class="login-box">
+    <input id="adminUser" placeholder="Admin Name">
+    <input id="adminPass" type="password" placeholder="Password">
+    <button class="btn" onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminPanel" style="display:none;">
+<button onclick="toggleSidebar()">☰ Menu</button>
+
+<div class="sidebar" id="sidebar">
+  <div onclick="adminSection('admins')">Add Admin</div>
+  <div onclick="adminSection('venues')">Manage Venues</div>
+  <div onclick="adminSection('media')">Event Highlights</div>
+  <div onclick="adminSection('scores')">Live Score</div>
+  <div onclick="adminSection('winners')">Winners</div>
+</div>
+
+<div id="adminContent"></div>
+
+</div>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <button onclick="show('leaderboard')">🏆</button>
-  <button onclick="show('venues')">📍</button>
-  <button onclick="show('gallery')">📸</button>
-  <button onclick="show('videos')">🎥</button>
-  <button onclick="show('winners')">🥇</button>
-  <button onclick="show('admin')">⚙️</button>
+<button onclick="show('leaderboard')">🏆</button>
+<button onclick="show('venues')">📍</button>
+<button onclick="show('highlights')">🎬</button>
+<button onclick="show('winners')">🥇</button>
+<button onclick="show('admin')">⚙️</button>
 </div>
 
 </div>
-
-<audio id="sound" src="intro.mp3"></audio>
 
 <script>
 /* FIREBASE */
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_ID"
+  apiKey:"YOUR_KEY",
+  authDomain:"YOUR_DOMAIN",
+  projectId:"YOUR_ID"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ENTER */
-function enterApp(){
-  document.getElementById("sound").play();
-  document.getElementById("splash").style.display="none";
-  loadBoard();
-}
-
-/* NAVIGATION */
+/* NAV */
 function show(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* LEADERBOARD */
-function loadBoard(){
-  db.collection("teams").onSnapshot(snapshot=>{
-    let board=document.getElementById("board");
-    board.innerHTML="";
-    let teams=[];
+/* LOGIN */
+function login(){
+  let u=document.getElementById("adminUser").value;
+  let p=document.getElementById("adminPass").value;
 
-    snapshot.forEach(doc=>teams.push(doc.data()));
-    teams.sort((a,b)=>b.score-a.score);
+  if(u==="admin" && p==="1234"){
+    document.getElementById("login").style.display="none";
+    document.getElementById("adminPanel").style.display="block";
+  }else{
+    alert("Wrong credentials");
+  }
+}
 
-    teams.forEach((t,i)=>{
-      let cls="";
-      if(i==0) cls="rank1";
-      else if(i==1) cls="rank2";
-      else if(i==2) cls="rank3";
+/* SIDEBAR */
+function toggleSidebar(){
+  let s=document.getElementById("sidebar");
+  s.style.display = s.style.display=="block"?"none":"block";
+}
 
-      board.innerHTML+=`
-        <div class="card ${cls}">
-          #${i+1} ${t.name}<br>Score: ${t.score}
-        </div>`;
-    });
+/* ADMIN SECTIONS */
+function adminSection(type){
+  let c=document.getElementById("adminContent");
+
+  if(type==="admins"){
+    c.innerHTML=`
+      <input placeholder="New Admin Name">
+      <input placeholder="Password">
+      <button class="btn">Add Admin</button>
+    `;
+  }
+
+  if(type==="venues"){
+    c.innerHTML=`
+      <input id="vname" placeholder="Venue Name">
+      <textarea id="vinfo" placeholder="Details"></textarea>
+      <button class="btn" onclick="addVenue()">Add Venue</button>
+    `;
+  }
+
+  if(type==="media"){
+    c.innerHTML=`
+      <input id="mediaUrl" placeholder="Image/Video URL">
+      <button class="btn" onclick="addMedia()">Add</button>
+    `;
+  }
+
+  if(type==="scores"){
+    c.innerHTML=`
+      <input id="team" placeholder="Team Name">
+      <input id="score" type="number" placeholder="Score">
+      <button class="btn" onclick="addScore()">Update</button>
+    `;
+  }
+
+  if(type==="winners"){
+    c.innerHTML=`
+      <input id="winner" placeholder="Winner Name">
+      <button class="btn" onclick="addWinner()">Add</button>
+    `;
+  }
+}
+
+/* FIREBASE FUNCTIONS */
+
+function addVenue(){
+  db.collection("venues").add({
+    name:vname.value,
+    info:vinfo.value
   });
 }
 
-/* ADMIN */
+function addMedia(){
+  db.collection("media").add({
+    url:mediaUrl.value
+  });
+}
+
 function addScore(){
-  let t=document.getElementById("team").value;
-  let s=parseInt(document.getElementById("score").value);
-
-  db.collection("teams").doc(t).set({
-    name:t,
-    score:s
+  db.collection("teams").doc(team.value).set({
+    name:team.value,
+    score:parseInt(score.value)
   });
 }
+
+function addWinner(){
+  db.collection("winners").add({
+    name:winner.value
+  });
+}
+
+/* LOAD DATA */
+
+// leaderboard
+db.collection("teams").onSnapshot(s=>{
+  let board=document.getElementById("board");
+  board.innerHTML="";
+  let arr=[];
+  s.forEach(d=>arr.push(d.data()));
+  arr.sort((a,b)=>b.score-a.score);
+  arr.forEach((t,i)=>{
+    board.innerHTML+=`<div class="card">#${i+1} ${t.name} - ${t.score}</div>`;
+  });
+});
+
+// venues
+db.collection("venues").onSnapshot(s=>{
+  let list=document.getElementById("venueList");
+  list.innerHTML="";
+  s.forEach(doc=>{
+    let v=doc.data();
+    list.innerHTML+=`<div class="card" onclick="openVenue('${v.name}','${v.info}')">${v.name}</div>`;
+  });
+});
+
+function openVenue(name,info){
+  show('venueDetail');
+  venueTitle.innerText=name;
+  venueInfo.innerText=info;
+}
+
+// media
+db.collection("media").onSnapshot(s=>{
+  let m=document.getElementById("media");
+  m.innerHTML="";
+  s.forEach(d=>{
+    let url=d.data().url;
+    m.innerHTML+=`<div class="card"><img src="${url}" width="100%"></div>`;
+  });
+});
+
+// winners
+db.collection("winners").onSnapshot(s=>{
+  let w=document.getElementById("winnerList");
+  w.innerHTML="";
+  s.forEach(d=>{
+    w.innerHTML+=`<div class="card">${d.data().name}</div>`;
+  });
+});
 </script>
 
 </body>
