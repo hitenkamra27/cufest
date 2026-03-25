@@ -35,87 +35,49 @@ body{background:#000;display:flex;justify-content:center;font-family:'Poppins';}
   flex-direction:column;
   z-index:20;
 }
+
 .logo{width:120px;}
 
-.btn{
-  padding:10px;
-  background:#000;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  margin-top:10px;
+.loader{
+  width:150px;height:4px;background:#ddd;margin-top:20px;
+  border-radius:10px;overflow:hidden;
 }
+.loader span{
+  display:block;height:100%;width:0%;background:#000;
+  animation:load 2.5s forwards;
+}
+@keyframes load{to{width:100%;}}
 
 /* HEADER */
-.header{
-  padding:15px;
-  text-align:center;
-  font-weight:600;
-  border-bottom:1px solid #eee;
-}
+.header{padding:15px;text-align:center;font-weight:600;border-bottom:1px solid #eee;}
 
-/* PAGES */
-.page{
-  display:none;
-  padding:15px;
-  height:calc(100vh - 120px);
-  overflow:auto;
-}
+.page{display:none;padding:15px;height:calc(100vh - 120px);overflow:auto;}
 .active{display:block;}
 
-/* CARD */
-.card{
-  background:#f5f5f5;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:12px;
-}
+.card{background:#f5f5f5;padding:15px;margin-bottom:10px;border-radius:12px;}
 
-/* NAV */
 .nav{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  height:60px;
-  display:flex;
-  background:#fff;
-  border-top:1px solid #eee;
+  position:absolute;bottom:0;width:100%;height:60px;
+  display:flex;background:#fff;border-top:1px solid #eee;
 }
-.nav button{
-  flex:1;
-  border:none;
-  background:none;
+.nav button{flex:1;border:none;background:none;}
+
+input,textarea{
+  width:100%;padding:10px;margin:5px 0;
+  border-radius:8px;border:1px solid #ddd;
 }
 
-/* INPUT */
-input, textarea{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border-radius:8px;
-  border:1px solid #ddd;
+.btn{
+  padding:10px;background:#000;color:#fff;
+  border:none;border-radius:8px;margin-top:10px;width:100%;
 }
 
-/* ADMIN SIDEBAR */
 .sidebar{
-  position:absolute;
-  left:-100%;
-  top:0;
-  width:70%;
-  height:100%;
-  background:#111;
-  color:#fff;
-  padding:20px;
-  transition:0.3s;
-  z-index:10;
+  position:absolute;left:-100%;top:0;width:70%;height:100%;
+  background:#111;color:#fff;padding:20px;transition:0.3s;
 }
-.sidebar.open{
-  left:0;
-}
-.sidebar div{
-  margin:15px 0;
-  cursor:pointer;
-}
+.sidebar.open{left:0;}
+.sidebar div{margin:15px 0;cursor:pointer;}
 </style>
 </head>
 
@@ -127,74 +89,46 @@ input, textarea{
 <div id="splash">
   <img src="logo.png" class="logo">
   <h2>CU FEST</h2>
-  <button class="btn" onclick="enterApp()">Enter</button>
+  <div class="loader"><span></span></div>
 </div>
 
-<!-- HEADER -->
 <div class="header">CU FEST</div>
 
 <!-- PAGES -->
-
 <div id="leaderboard" class="page active">
 <h3>🏆 Leaderboard</h3>
 <div id="board"></div>
 </div>
 
-<div id="venues" class="page">
-<h3>📍 Venues</h3>
-<div id="venueList"></div>
-</div>
+<div id="admin" class="page">
 
-<div id="venueDetail" class="page">
-<h3 id="venueTitle"></h3>
-<p id="venueInfo"></p>
-</div>
-
-<div id="highlights" class="page">
-<h3>🎬 Event Highlights</h3>
-<div id="media"></div>
-</div>
-
-<div id="winners" class="page">
-<h3>🥇 Winners</h3>
-<div id="winnerList"></div>
+<!-- LOGIN -->
+<div id="loginBox">
+  <input id="adminUser" placeholder="Admin Name">
+  <input id="adminPass" type="password" placeholder="Password">
+  <button class="btn" onclick="handleLogin()">Login</button>
 </div>
 
 <!-- ADMIN PANEL -->
-<div id="admin" class="page">
+<div id="adminPanel" style="display:none;">
+<button class="btn" onclick="toggleSidebar()">☰ Menu</button>
 
-  <!-- LOGIN -->
-  <div id="login">
-    <input id="adminUser" placeholder="Admin Name">
-    <input id="adminPass" type="password" placeholder="Password">
-    <button class="btn" onclick="login()">Login</button>
-  </div>
+<div id="adminSidebar" class="sidebar">
+  <div onclick="loadDashboard()">Dashboard</div>
+  <div onclick="loadSection('admins')">Add Admin</div>
+  <div onclick="loadSection('venues')">Venues</div>
+  <div onclick="loadSection('media')">Highlights</div>
+  <div onclick="loadSection('winners')">Winners</div>
+</div>
 
-  <!-- PANEL -->
-  <div id="adminPanel" style="display:none; position:relative; height:100%;">
-
-    <button class="btn" onclick="toggleAdminSidebar()">☰ Menu</button>
-
-    <div id="adminSidebar" class="sidebar">
-      <div onclick="adminSection('dashboard')">Dashboard</div>
-      <div onclick="adminSection('admins')">Add Admin</div>
-      <div onclick="adminSection('venues')">Venues</div>
-      <div onclick="adminSection('media')">Highlights</div>
-      <div onclick="adminSection('winners')">Winners</div>
-    </div>
-
-    <div id="adminContent"></div>
-
-  </div>
+<div id="adminContent"></div>
+</div>
 
 </div>
 
 <!-- NAV -->
 <div class="nav">
 <button onclick="show('leaderboard')">🏆</button>
-<button onclick="show('venues')">📍</button>
-<button onclick="show('highlights')">🎬</button>
-<button onclick="show('winners')">🥇</button>
 <button onclick="show('admin')">⚙️</button>
 </div>
 
@@ -202,151 +136,85 @@ input, textarea{
 
 <script>
 
+/* SPLASH */
+setTimeout(()=>{document.getElementById("splash").style.display="none";},2000);
+
 /* NAV */
 function show(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* SPLASH */
-function enterApp(){
-  document.getElementById("splash").style.display="none";
-}
+/* ✅ FIXED LOGIN */
+function handleLogin(){
+  const user = document.getElementById("adminUser").value.trim();
+  const pass = document.getElementById("adminPass").value.trim();
 
-/* LOGIN */
-function login(){
-  let u = adminUser.value;
-  let p = adminPass.value;
-
-  if(u==="Hiten" && p==="1234"){
-    login.style.display="none";
-    adminPanel.style.display="block";
-    loadAdminDashboard();
+  if(user === "Hiten" && pass === "1234"){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    loadDashboard();
   } else {
-    alert("Wrong credentials");
+    alert("Invalid credentials");
   }
 }
 
 /* SIDEBAR */
-function toggleAdminSidebar(){
+function toggleSidebar(){
   document.getElementById("adminSidebar").classList.toggle("open");
 }
 
 /* DASHBOARD */
-function loadAdminDashboard(){
-  adminContent.innerHTML = `
+function loadDashboard(){
+  document.getElementById("adminContent").innerHTML = `
     <h3>Welcome Hiten 👋</h3>
-    <p>Manage CU FEST here.</p>
+    <p>Admin panel is working correctly.</p>
   `;
 }
 
-/* ADMIN SECTIONS */
-function adminSection(type){
-  let c = adminContent;
-
-  if(type==="dashboard") loadAdminDashboard();
+/* SECTIONS */
+function loadSection(type){
+  let c=document.getElementById("adminContent");
 
   if(type==="admins"){
-    c.innerHTML=`
-      <h3>Add Admin</h3>
-      <input placeholder="Name">
-      <input placeholder="Password">
-      <button class="btn">Add</button>`;
+    c.innerHTML=`<input placeholder="Name"><input placeholder="Password"><button class="btn">Add</button>`;
   }
 
   if(type==="venues"){
-    c.innerHTML=`
-      <input id="vname" placeholder="Venue Name">
-      <textarea id="vinfo" placeholder="Details"></textarea>
-      <button class="btn" onclick="addVenue()">Add Venue</button>`;
+    c.innerHTML=`<input placeholder="Venue"><textarea placeholder="Details"></textarea><button class="btn">Add</button>`;
   }
 
   if(type==="media"){
-    c.innerHTML=`
-      <input id="mediaUrl" placeholder="Image URL">
-      <button class="btn" onclick="addMedia()">Add</button>`;
+    c.innerHTML=`<input placeholder="Image URL"><button class="btn">Add</button>`;
   }
 
   if(type==="winners"){
-    c.innerHTML=`
-      <input id="winner" placeholder="Winner">
-      <button class="btn" onclick="addWinner()">Add</button>`;
+    c.innerHTML=`<input placeholder="Winner"><button class="btn">Add</button>`;
   }
 
-  toggleAdminSidebar();
-}
-
-/* FIREBASE */
-const firebaseConfig={
-  apiKey:"YOUR_KEY",
-  authDomain:"YOUR_DOMAIN",
-  projectId:"YOUR_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-
-function addVenue(){
-  db.collection("venues").add({name:vname.value,info:vinfo.value});
-}
-
-function addMedia(){
-  db.collection("media").add({url:mediaUrl.value});
-}
-
-function addWinner(){
-  db.collection("winners").add({name:winner.value});
+  toggleSidebar();
 }
 
 /* 🔥 GOOGLE SHEET LEADERBOARD */
 async function loadLeaderboard(){
-  const res=await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
-  const data=await res.json();
+  const res = await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
+  const data = await res.json();
 
+  const board = document.getElementById("board");
   board.innerHTML="";
 
   data.sort((a,b)=>parseInt(b.score)-parseInt(a.score));
 
   data.forEach((t,i)=>{
-    board.innerHTML+=`
+    board.innerHTML += `
       <div class="card">
-        <h3>#${i+1} ${t.name}</h3>
-        <p>${t.score}</p>
+        #${i+1} ${t.name}<br>Score: ${t.score}
       </div>`;
   });
 }
 
 setInterval(loadLeaderboard,3000);
 loadLeaderboard();
-
-/* LOAD DATA */
-
-db.collection("venues").onSnapshot(s=>{
-  venueList.innerHTML="";
-  s.forEach(d=>{
-    let v=d.data();
-    venueList.innerHTML+=`<div class="card" onclick="openVenue('${v.name}','${v.info}')">${v.name}</div>`;
-  });
-});
-
-function openVenue(name,info){
-  show('venueDetail');
-  venueTitle.innerText=name;
-  venueInfo.innerText=info;
-}
-
-db.collection("media").onSnapshot(s=>{
-  media.innerHTML="";
-  s.forEach(d=>{
-    media.innerHTML+=`<div class="card"><img src="${d.data().url}" width="100%"></div>`;
-  });
-});
-
-db.collection("winners").onSnapshot(s=>{
-  winnerList.innerHTML="";
-  s.forEach(d=>{
-    winnerList.innerHTML+=`<div class="card">${d.data().name}</div>`;
-  });
-});
 
 </script>
 
