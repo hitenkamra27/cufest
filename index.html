@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .rank1 { border-left: 5px solid gold; }
+    .rank2 { border-left: 5px solid silver; }
+    .rank3 { border-left: 5px solid #cd7f32; }
+
+    .live {
+      color: #22c55e;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>CU FEST LIVE SCORES</h1>
+<div id="leaderboard"></div>
+
+<script>
+const API_URL = "https://sheetdb.io/api/v1/w9e5b0g16a5lw";
+
+async function fetchData() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+
+  const totals = {};
+
+  data.forEach(item => {
+    const dept = item.Department;
+    const points = parseInt(item.Points) || 0;
+
+    if (!totals[dept]) {
+      totals[dept] = {
+        points: 0,
+        live: item.LiveScore,
+        venue: item.Venue
+      };
+    }
+
+    totals[dept].points += points;
+  });
+
+  const sorted = Object.entries(totals)
+    .sort((a, b) => b[1].points - a[1].points);
+
+  const container = document.getElementById("leaderboard");
+  container.innerHTML = "";
+
+  sorted.forEach(([dept, info], index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    if(index === 0) div.classList.add("rank1");
+    if(index === 1) div.classList.add("rank2");
+    if(index === 2) div.classList.add("rank3");
+
+    div.innerHTML = `
+      <div>
+        <strong>#${index + 1} ${dept}</strong><br>
+        <span class="live">Live: ${info.live} | ${info.venue}</span>
+      </div>
+      <div>${info.points} pts</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+fetchData();
+setInterval(fetchData, 5000);
+</script>
+
+</body>
+</html>
