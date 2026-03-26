@@ -899,6 +899,33 @@ setInterval(loadLeaderboard, 10000);
 
 
 /* ════════════════════════════════
+   VENUES (Firebase)
+════════════════════════════════ */
+db.collection("venues").onSnapshot(snapshot => {
+  const list = document.getElementById('venueList');
+  if (snapshot.empty) {
+    list.innerHTML = '<div class="empty"><div class="e-icon">📍</div>No venues added yet</div>';
+    return;
+  }
+  list.innerHTML = '';
+  snapshot.forEach(doc => {
+    const v = doc.data();
+    list.innerHTML += `
+      <div class="venue-card" onclick="openVenue('${escHtml(v.name)}','${escHtml(v.info)}')">
+        <span class="venue-icon">🏟️</span>
+        <span class="venue-name">${escHtml(v.name)}</span>
+      </div>`;
+  });
+}, err => console.error("Venues error:", err));
+
+function openVenue(name, info) {
+  document.getElementById('venueTitle').textContent = name;
+  document.getElementById('venueInfo').textContent  = info;
+  show('venueDetail');
+}
+
+
+/* ════════════════════════════════
    MEDIA HIGHLIGHTS (Firebase)
 ════════════════════════════════ */
 db.collection("media").onSnapshot(snapshot => {
