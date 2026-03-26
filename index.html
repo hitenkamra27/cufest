@@ -107,7 +107,7 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
   display:flex;
   justify-content:space-between;
   cursor:pointer;
-}
+} 
 #searchInput{
   width:100%;
   padding:10px;
@@ -125,7 +125,7 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 
 <!-- SPLASH -->
 <div id="splash">
-<img src="logo.png" class="logo">
+<img src="CU-FEST.png" class="logo">
 <h2>CU FEST</h2>
 <div class="loader"><span></span></div>
 </div>
@@ -373,6 +373,36 @@ async function loadLeaderboard(){
 
   const top3 = teams.slice(0,3);
 
+  function openDetails(name){
+  const url = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
+
+  fetch(url)
+    .then(res=>res.json())
+    .then(data=>{
+
+      const filtered = data.filter(d => d.Department === name);
+
+      let total = 0;
+      let html = "";
+
+      filtered.forEach(item=>{
+        const pts = parseInt(item.Points || 0);
+        total += pts;
+
+        html += `
+          <div class="detail-card">
+            ${item.Category} → ${pts} pts
+          </div>`;
+      });
+
+      document.getElementById("detailName").innerText = name;
+      document.getElementById("detailPoints").innerText = total;
+      document.getElementById("categoryList").innerHTML = html;
+
+      show('teamDetail');
+    });
+}
+
   // 🏆 PODIUM
   board.innerHTML += `
     <div class="podium">
@@ -406,7 +436,7 @@ async function loadLeaderboard(){
   `;
 
   // 📋 REST LIST
-  teams.slice(3, 15).forEach((team,i)=>{
+  teams.slice(3).forEach((team,i)=>{
     board.innerHTML += `
       <div class="list-card" onclick="openDetails('${team.name}')">
         <div>#${i+4} ${team.name}</div>
@@ -421,6 +451,15 @@ loadLeaderboard();
 function openDetails(name){
   alert("Open details for " + name);
 }
+<div id="teamDetail" class="page">
+  <h3 id="detailName"></h3>
+  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
+
+  <h4>Category Breakdown</h4>
+  <div id="categoryList"></div>
+
+  <button onclick="show('leaderboard')">⬅ Back</button>
+</div>
 
 /* AUTO REFRESH */
 setInterval(loadLeaderboard, 5000);
@@ -455,17 +494,24 @@ s.forEach(d=>{
 winnerList.innerHTML+=`<div class="card">${d.data().name}</div>`;
 });
 });
+
 function searchTeam(){
   const input = document.getElementById("searchInput").value.toLowerCase();
-  const cards = document.querySelectorAll(".list-card");
 
-  cards.forEach(card=>{
-    if(card.innerText.toLowerCase().includes(input)){
-      card.style.display = "flex";
-    } else {
-      card.style.display = "none";
-    }
-  });
+  // reload full leaderboard first
+  loadLeaderboard();
+
+  setTimeout(()=>{
+    const cards = document.querySelectorAll(".list-card");
+
+    cards.forEach(card=>{
+      if(card.innerText.toLowerCase().includes(input)){
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  },200);
 }
 
 </script>
