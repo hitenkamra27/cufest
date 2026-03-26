@@ -46,6 +46,12 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 .sidebar div{margin:15px 0;cursor:pointer;}
 
 .success{color:green;margin-top:10px;}
+.detail-card{
+  background:#f3f4f6;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+}
 </style>
 </head>
 
@@ -55,7 +61,7 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 
 <!-- SPLASH -->
 <div id="splash">
-<img src="logo.png" class="logo">
+<img src="CU-FEST.png" class="logo">
 <h2>CU FEST</h2>
 <div class="loader"><span></span></div>
 </div>
@@ -271,30 +277,111 @@ async function loadLeaderboard(){
     const board = document.getElementById("board");
     board.innerHTML = "";
 
-    // SORT BY POINTS
-    data.sort((a,b)=>parseInt(b.Points || 0) - parseInt(a.Points || 0));
+    // GROUP BY DEPARTMENT (SUM POINTS)
+    const grouped = {};
 
-    data.forEach((team,i)=>{
+    data.forEach(row=>{
+      const dept = row.Department;
+      const points = parseInt(row.Points || 0);
+
+      if(!grouped[dept]){
+        grouped[dept] = {
+          total: 0,
+          categories: []
+        };
+      }
+
+      grouped[dept].total += points;
+
+      grouped[dept].categories.push({
+        category: row.Category,
+        points: points
+      });
+    });
+
+    // CONVERT TO ARRAY
+    const teams = Object.keys(grouped).map(name=>({
+      name,
+      total: grouped[name].total,
+      categories: grouped[name].categories
+    }));
+
+    // SORT
+    teams.sort((a,b)=>b.total - a.total);
+
+    // 🥇 TOP 3 PODIUM
+    const top3 = teams.slice(0,3);
+
+    board.innerHTML += `
+      <div class="podium">
+        ${top3[1] ? `
+        <div class="podium-item" onclick='openDetails(${JSON.stringify(top3[1])})'>
+          <div class="rank-badge">2</div>
+          <div>${top3[1].name}</div>
+          <small>${top3[1].total} pts</small>
+        </div>` : ""}
+
+        ${top3[0] ? `
+        <div class="podium-item first" onclick='openDetails(${JSON.stringify(top3[0])})'>
+          <div class="rank-badge">1</div>
+          <b>${top3[0].name}</b>
+          <small>${top3[0].total} pts</small>
+        </div>` : ""}
+
+        ${top3[2] ? `
+        <div class="podium-item" onclick='openDetails(${JSON.stringify(top3[2])})'>
+          <div class="rank-badge">3</div>
+          <div>${top3[2].name}</div>
+          <small>${top3[2].total} pts</small>
+        </div>` : ""}
+      </div>
+    `;
+
+    // 📋 REST LIST
+    teams.slice(3).forEach((team,i)=>{
       board.innerHTML += `
-        <div class="card">
-          <h3>#${i+1} ${team.Department || "N/A"}</h3>
-          <p>Category: ${team.Category || "-"}</p>
-          <p>Points: ${team.Points || 0}</p>
-          <p>Live Score: ${team.LiveScore || "-"}</p>
-          <p>Venue: ${team.Venue || "-"}</p>
+        <div class="list-card" onclick='openDetails(${JSON.stringify(team)})'>
+          <div>#${i+4} ${team.name}</div>
+          <div>${team.total} pts</div>
         </div>
       `;
     });
 
   } catch(err){
     console.error(err);
-    document.getElementById("board").innerHTML =
-      "<p>⚠️ Failed to load leaderboard</p>";
   }
 }
 
-setInterval(loadLeaderboard, 5000);
+setInterval(loadLeaderboard,5000);
 loadLeaderboard();
+
+function openDetails(team){
+  show('teamDetail');
+
+  document.getElementById("detailName").innerText = team.name;
+  document.getElementById("detailPoints").innerText = team.total;
+
+  const list = document.getElementById("categoryList");
+  list.innerHTML = "";
+
+  team.categories.forEach(c=>{
+    list.innerHTML += `
+      <div class="detail-card">
+        ${c.category} → ${c.points} pts
+      </div>
+    `;
+  });
+}
+
+<div id="teamDetail" class="page">
+  <h3 id="detailName"></h3>
+  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
+
+  <h4>Category Breakdown</h4>
+  <div id="categoryList"></div>
+
+  <button class="btn" onclick="show('leaderboard')">⬅ Back</button>
+</div>
 
 /* AUTO REFRESH */
 setInterval(loadLeaderboard, 5000);
