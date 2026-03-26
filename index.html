@@ -262,17 +262,36 @@ function uploadImage(){
 
 /* LEADERBOARD */
 async function loadLeaderboard(){
-const res=await fetch("https://sheetdb.io/api/v1/w9e5b0g16a5lw");
-const data=await res.json();
+  const url = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 
-board.innerHTML="";
-data.sort((a,b)=>b.score-a.score);
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
 
-data.forEach((t,i)=>{
-board.innerHTML+=`<div class="card">#${i+1} ${t.name}<br>${t.score}</div>`;
-});
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    // SORT BY SCORE
+    data.sort((a,b)=>parseInt(b.score)-parseInt(a.score));
+
+    data.forEach((team,i)=>{
+      board.innerHTML += `
+        <div class="card">
+          <h3>#${i+1} ${team.name}</h3>
+          <p>Score: ${team.score}</p>
+        </div>
+      `;
+    });
+
+  } catch(err){
+    console.error(err);
+    document.getElementById("board").innerHTML =
+      "<p>⚠️ Failed to load leaderboard</p>";
+  }
 }
-setInterval(loadLeaderboard,3000);
+
+/* AUTO REFRESH */
+setInterval(loadLeaderboard, 5000);
 loadLeaderboard();
 
 /* LOAD DATA */
