@@ -46,6 +46,68 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 .sidebar div{margin:15px 0;cursor:pointer;}
 
 .success{color:green;margin-top:10px;}
+/* 🔥 PODIUM UPGRADE */
+.podium{
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-end;
+  margin-bottom:25px;
+}
+
+.podium-item{
+  text-align:center;
+  cursor:pointer;
+  position:relative;
+}
+
+.podium-item .logo-circle{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  margin:auto;
+  margin-bottom:5px;
+}
+
+.first{
+  transform:scale(1.2);
+}
+
+.crown{
+  position:absolute;
+  top:-18px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:18px;
+}
+
+.rank-badge{
+  background:#000;
+  color:#fff;
+  border-radius:50%;
+  width:25px;
+  height:25px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:auto;
+  margin-top:5px;
+}
+
+.list-card{
+  background:linear-gradient(135deg,#6a5af9,#8b7cf6);
+  color:#fff;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -264,37 +326,84 @@ function uploadImage(){
 async function loadLeaderboard(){
   const url = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 
-  try{
-    const res = await fetch(url);
-    const data = await res.json();
+  const res = await fetch(url);
+  const data = await res.json();
 
-    const board = document.getElementById("board");
-    board.innerHTML = "";
+  const grouped = {};
 
-    // SORT BY POINTS
-    data.sort((a,b)=>parseInt(b.Points || 0) - parseInt(a.Points || 0));
+  // 🔥 GROUP BY DEPARTMENT
+  data.forEach(row=>{
+    const dept = row.Department;
+    const pts = parseInt(row.Points || 0);
 
-    data.forEach((team,i)=>{
-      board.innerHTML += `
-        <div class="card">
-          <h3>#${i+1} ${team.Department || "N/A"}</h3>
-          <p>Category: ${team.Category || "-"}</p>
-          <p>Points: ${team.Points || 0}</p>
-          <p>Live Score: ${team.LiveScore || "-"}</p>
-          <p>Venue: ${team.Venue || "-"}</p>
-        </div>
-      `;
-    });
+    if(!grouped[dept]){
+      grouped[dept] = 0;
+    }
 
-  } catch(err){
-    console.error(err);
-    document.getElementById("board").innerHTML =
-      "<p>⚠️ Failed to load leaderboard</p>";
-  }
+    grouped[dept] += pts;
+  });
+
+  const teams = Object.keys(grouped).map(name=>({
+    name,
+    total: grouped[name]
+  }));
+
+  // SORT
+  teams.sort((a,b)=>b.total - a.total);
+
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+
+  const top3 = teams.slice(0,3);
+
+  // 🏆 PODIUM
+  board.innerHTML += `
+    <div class="podium">
+
+      ${top3[1] ? `
+      <div class="podium-item" onclick="openDetails('${top3[1].name}')">
+        <div class="logo-circle">${top3[1].name.charAt(0)}</div>
+        <div class="rank-badge">2</div>
+        <div>${top3[1].name}</div>
+        <small>${top3[1].total} pts</small>
+      </div>` : ""}
+
+      ${top3[0] ? `
+      <div class="podium-item first" onclick="openDetails('${top3[0].name}')">
+        <div class="crown">👑</div>
+        <div class="logo-circle">${top3[0].name.charAt(0)}</div>
+        <div class="rank-badge">1</div>
+        <b>${top3[0].name}</b>
+        <small>${top3[0].total} pts</small>
+      </div>` : ""}
+
+      ${top3[2] ? `
+      <div class="podium-item" onclick="openDetails('${top3[2].name}')">
+        <div class="logo-circle">${top3[2].name.charAt(0)}</div>
+        <div class="rank-badge">3</div>
+        <div>${top3[2].name}</div>
+        <small>${top3[2].total} pts</small>
+      </div>` : ""}
+
+    </div>
+  `;
+
+  // 📋 REST LIST
+  teams.slice(3).forEach((team,i)=>{
+    board.innerHTML += `
+      <div class="list-card" onclick="openDetails('${team.name}')">
+        <div>#${i+4} ${team.name}</div>
+        <div>${team.total} pts</div>
+      </div>
+    `;
+  });
 }
 
-setInterval(loadLeaderboard, 5000);
+setInterval(loadLeaderboard,5000);
 loadLeaderboard();
+function openDetails(name){
+  alert("Open details for " + name);
+}
 
 /* AUTO REFRESH */
 setInterval(loadLeaderboard, 5000);
