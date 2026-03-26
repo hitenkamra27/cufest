@@ -152,23 +152,14 @@ body {
 /* ── VENUES ── */
 .venue-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; display: flex; align-items: center; gap: 12px; }
 .venue-card:hover { border-color: var(--accent2); transform: translateX(3px); }
-.venue-icon { font-size: 24px; }
+.venue-icon { font-size: 24px; flex-shrink: 0; }
 .venue-name { font-weight: 600; font-size: 15px; }
 
 /* ── VENUE DETAIL ── */
-.venue-detail-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
-}
-.venue-detail-row {
-  display: flex; gap: 12px; padding: 13px 16px;
-  border-bottom: 1px solid var(--border); align-items: flex-start;
-}
+.venue-detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.venue-detail-row { display: flex; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); align-items: flex-start; }
 .venue-detail-row:last-child { border-bottom: none; }
-.venue-detail-label {
-  font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
-  color: var(--muted); font-weight: 600; min-width: 80px; padding-top: 1px;
-}
+.venue-detail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; min-width: 80px; padding-top: 2px; flex-shrink: 0; }
 .venue-detail-value { font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
 
 /* ── MEDIA ── */
@@ -178,19 +169,11 @@ body {
 .media-item:hover img { transform: scale(1.05); }
 
 /* ── WINNERS ── */
-.winner-card {
-  display: flex; align-items: flex-start; gap: 14px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 14px; margin-bottom: 10px; animation: fadeIn 0.3s ease both;
-}
+.winner-card { display: flex; align-items: flex-start; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; animation: fadeIn 0.3s ease both; }
 .winner-medal { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
 .winner-name  { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
 .winner-sub   { font-size: 12px; color: var(--muted); line-height: 1.5; }
-.winner-tag {
-  display: inline-block; background: rgba(240,192,64,0.12);
-  color: var(--accent); border-radius: 20px; padding: 2px 8px;
-  font-size: 11px; font-weight: 600; margin: 2px 2px 0 0;
-}
+.winner-tag { display: inline-block; background: rgba(240,192,64,0.12); color: var(--accent); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 600; margin: 2px 2px 0 0; }
 
 /* ── NAV ── */
 .nav { height: var(--nav-h); display: flex; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
@@ -305,7 +288,7 @@ body {
     <!-- WINNERS -->
     <div id="winners" class="page">
       <div class="page-title">🥇 Winners</div>
-      <div id="winnerList"></div>
+      <div id="winnerList"><div class="loading"><div class="spinner"></div>Loading winners…</div></div>
     </div>
 
     <!-- ADMIN -->
@@ -344,7 +327,7 @@ body {
           </div>
         </div>
         <div id="adminContent"></div>
-        <button class="btn btn-outline" onclick="logout()">Sign Out</button>
+        <button class="btn btn-outline" style="margin-top:10px;" onclick="logout()">Sign Out</button>
       </div>
 
     </div>
@@ -369,8 +352,15 @@ const SUPABASE_URL      = "https://nsaiepdggaakgcdabjbf.supabase.co";
 const SUPABASE_ANON     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zYWllcGRnZ2Fha2djZGFiamJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTM0MDUsImV4cCI6MjA5MDA4OTQwNX0.XHUGYYKX7TwUE6I5pPBBiI81LBx4Icn1KfXLx4Ib_NA";
 const SHEET_URL         = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 const CLOUDINARY_CLOUD  = "dyt6iai2c";
-const CLOUDINARY_PRESET = "CU_FEST_UPLOAD";
-const CLOUDINARY_API_KEY = "567731757472957";
+
+/*
+  ── CLOUDINARY PRESET ──
+  Name set exactly as in your Cloudinary dashboard.
+  IMPORTANT: In Cloudinary → Settings → Upload → Upload Presets
+  → find "CU FEST UPLOAD" → click Edit → set Signing Mode to UNSIGNED
+  Without this, uploads will be rejected.
+*/
+const CLOUDINARY_PRESET = "CU FEST UPLOAD";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -415,21 +405,27 @@ function showMsg(text, isError = false) {
     : `<div class="success-msg">✅ ${escHtml(text)}</div>`;
 }
 
-/* ── FIX: Cloudinary upload now includes api_key ── */
+/* ══════════════════════════
+   CLOUDINARY — unsigned upload (NO api_key needed)
+══════════════════════════ */
 async function uploadToCloudinary(file) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
-  fd.append('api_key', CLOUDINARY_API_KEY);
-  const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method:'POST', body:fd });
+  /* Do NOT include api_key for unsigned presets */
+
+  const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
   const data = await res.json();
-  if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed — check Cloudinary preset is set to "Unsigned"');
+
+  if (!data.secure_url) {
+    const msg = data.error?.message || JSON.stringify(data);
+    throw new Error('Cloudinary: ' + msg);
+  }
   return data.secure_url;
 }
 
 /* ══════════════════════════
    LOGO
-   FIX: was loading wrong key 'CU-FEST.png', now loads 'logo_url'
 ══════════════════════════ */
 async function loadLogo() {
   try {
@@ -460,9 +456,9 @@ async function uploadLogo() {
   try {
     const url = await uploadToCloudinary(file);
     const { error } = await sb.from('settings').upsert({ id: 'logo_url', value: url });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error('Supabase: ' + error.message);
     applyLogo(url);
-    showMsg('Logo updated! Appears in header and splash screen.');
+    showMsg('Logo updated successfully!');
   } catch(err) { showMsg(err.message, true); }
 }
 
@@ -560,51 +556,75 @@ setInterval(loadLeaderboard, 10000);
 
 /* ══════════════════════════
    VENUES
-   FIX: Now shows Venue, Event Details AND Timings properly
+   ── Stores full data in window._venuesData
+   ── Opens detail by numeric id
+   ── Handles both "Venue" and "venue" column casing
 ══════════════════════════ */
+window._venuesData = [];
+
 async function loadVenues() {
-  const { data, error } = await sb.from('venues').select('*').order('created_at', { ascending: false });
   const list = document.getElementById('venueList');
-  if (error || !data?.length) {
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading venues…</div>';
+
+  const { data, error } = await sb.from('venues').select('*').order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="empty"><div class="e-icon">⚠️</div>${escHtml(error.message)}<br>
+      <small style="display:block;margin-top:6px;font-size:11px;">
+        In Supabase → Authentication → Policies → venues table:<br>
+        Add policy: allow anon SELECT.
+      </small></div>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
     list.innerHTML = '<div class="empty"><div class="e-icon">📍</div>No venues added yet</div>';
     return;
   }
-  list.innerHTML = data.map(v => `
-    <div class="venue-card" onclick="openVenue(${v.id})">
-      <span class="venue-icon">🏟️</span>
-      <div>
-        <div class="venue-name">${escHtml(v["Venue"])}</div>
-        ${v["Timings"] ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;">🕐 ${escHtml(v["Timings"])}</div>` : ''}
-      </div>
-    </div>
-  `).join('');
 
-  // Store data globally for detail view
   window._venuesData = data;
+
+  list.innerHTML = data.map(v => {
+    const name    = v["Venue"]   || v["venue"]   || 'Unnamed';
+    const timings = v["Timings"] || v["timings"] || '';
+    return `
+      <div class="venue-card" onclick="openVenue(${v.id})">
+        <span class="venue-icon">🏟️</span>
+        <div style="flex:1;min-width:0;">
+          <div class="venue-name">${escHtml(name)}</div>
+          ${timings ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;">🕐 ${escHtml(timings)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function openVenue(id) {
-  const v = window._venuesData?.find(x => x.id === id);
+  const v = window._venuesData.find(x => x.id === id);
   if (!v) return;
-  document.getElementById('venueTitle').textContent = v["Venue"] || '';
+
+  const venueName    = v["Venue"]         || v["venue"]         || '';
+  const eventDetails = v["Event Details"] || v["event_details"] || '';
+  const timings      = v["Timings"]       || v["timings"]       || '';
+
+  document.getElementById('venueTitle').textContent = venueName;
 
   let rows = '';
-  if (v["Event Details"]) {
-    rows += `
-      <div class="venue-detail-row">
-        <span class="venue-detail-label">Details</span>
-        <span class="venue-detail-value">${escHtml(v["Event Details"])}</span>
-      </div>`;
+  if (eventDetails) {
+    rows += `<div class="venue-detail-row">
+      <span class="venue-detail-label">Details</span>
+      <span class="venue-detail-value">${escHtml(eventDetails)}</span>
+    </div>`;
   }
-  if (v["Timings"]) {
-    rows += `
-      <div class="venue-detail-row">
-        <span class="venue-detail-label">Timings</span>
-        <span class="venue-detail-value">${escHtml(v["Timings"])}</span>
-      </div>`;
+  if (timings) {
+    rows += `<div class="venue-detail-row">
+      <span class="venue-detail-label">Timings</span>
+      <span class="venue-detail-value">${escHtml(timings)}</span>
+    </div>`;
   }
   if (!rows) {
-    rows = `<div class="venue-detail-row"><span class="venue-detail-value" style="color:var(--muted)">No details provided.</span></div>`;
+    rows = `<div class="venue-detail-row">
+      <span class="venue-detail-value" style="color:var(--muted)">No details provided.</span>
+    </div>`;
   }
 
   document.getElementById('venueDetailContent').innerHTML =
@@ -613,13 +633,14 @@ function openVenue(id) {
 }
 
 /* ══════════════════════════
-   MEDIA HIGHLIGHTS
+   MEDIA
 ══════════════════════════ */
 async function loadMedia() {
   try {
-    const { data } = await sb.from('settings').select('value').eq('id','media_urls').maybeSingle();
+    const { data, error } = await sb.from('settings').select('value').eq('id','media_urls').maybeSingle();
+    if (error) console.warn('Media load:', error.message);
     renderMedia(data?.value ? JSON.parse(data.value) : []);
-  } catch(_) { renderMedia([]); }
+  } catch(e) { renderMedia([]); }
 }
 
 function renderMedia(urls) {
@@ -629,48 +650,66 @@ function renderMedia(urls) {
     return;
   }
   grid.innerHTML = urls.map(url =>
-    `<div class="media-item"><img src="${escHtml(url)}" loading="lazy" alt="highlight"></div>`
+    `<div class="media-item"><img src="${escHtml(url)}" loading="lazy" alt="highlight" onerror="this.parentElement.style.display='none'"></div>`
   ).join('');
 }
 
 async function saveMediaUrls(urls) {
-  await sb.from('settings').upsert({ id: 'media_urls', value: JSON.stringify(urls) });
+  const { error } = await sb.from('settings').upsert({ id: 'media_urls', value: JSON.stringify(urls) });
+  if (error) throw new Error('Supabase: ' + error.message);
 }
 
 /* ══════════════════════════
    WINNERS
-   FIX: Removed broken {escHtml(w.na typo
-        Now shows Name, UID, Department, Category, Position as tags
+   ── Handles both capitalised and lowercase column names
+   ── No broken template literal typos
 ══════════════════════════ */
 const medals = ['🥇','🥈','🥉'];
 
 async function loadWinners() {
-  const { data, error } = await sb.from('winners').select('*').order('created_at', { ascending: true });
   const list = document.getElementById('winnerList');
-  if (error || !data?.length) {
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading winners…</div>';
+
+  const { data, error } = await sb.from('winners').select('*').order('created_at', { ascending: true });
+
+  if (error) {
+    list.innerHTML = `<div class="empty"><div class="e-icon">⚠️</div>${escHtml(error.message)}<br>
+      <small style="display:block;margin-top:6px;font-size:11px;">
+        In Supabase → Authentication → Policies → winners table:<br>
+        Add policy: allow anon SELECT.
+      </small></div>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
     list.innerHTML = '<div class="empty"><div class="e-icon">🏆</div>No winners announced yet</div>';
     return;
   }
+
   list.innerHTML = data.map((w, i) => {
-    const tags = [w["UID"], w["Department"], w["Category"], w["Position"]]
+    const name     = w["Name"]       || w["name"]       || '';
+    const uid      = w["UID"]        || w["uid"]        || '';
+    const dept     = w["Department"] || w["department"] || '';
+    const category = w["Category"]   || w["category"]   || '';
+    const position = w["Position"]   || w["position"]   || '';
+
+    const tags = [uid, dept, category, position]
       .filter(Boolean)
       .map(t => `<span class="winner-tag">${escHtml(t)}</span>`)
       .join('');
-    return `
-      <div class="winner-card">
-        <span class="winner-medal">${medals[i] || '🎖️'}</span>
-        <div>
-          <div class="winner-name">${escHtml(w["Name"] || '')}</div>
-          ${tags ? `<div class="winner-sub" style="margin-top:4px;">${tags}</div>` : ''}
-        </div>
-      </div>`;
+
+    return `<div class="winner-card">
+      <span class="winner-medal">${medals[i] || '🎖️'}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="winner-name">${escHtml(name)}</div>
+        ${tags ? `<div class="winner-sub" style="margin-top:5px;">${tags}</div>` : ''}
+      </div>
+    </div>`;
   }).join('');
 }
 
 /* ══════════════════════════
    ADMIN — Login / Logout
-   FIX: Added .limit(1) to prevent false login on empty table query
-        Cleared loginErr before new attempt so stale errors don't persist
 ══════════════════════════ */
 async function handleLogin() {
   const u   = document.getElementById('adminUser').value.trim();
@@ -689,7 +728,6 @@ async function handleLogin() {
 
     if (error) { err.textContent = '❌ ' + error.message; return; }
 
-    /* FIX: Must have exactly 1 matching row — empty array = wrong credentials */
     if (data && data.length === 1) {
       sessionStorage.setItem('cu_admin', u);
       document.getElementById('loginBox').style.display   = 'none';
@@ -698,7 +736,6 @@ async function handleLogin() {
       err.textContent = '';
     } else {
       err.textContent = '❌ Wrong username or password';
-      /* FIX: Clear password field after failed attempt */
       document.getElementById('adminPass').value = '';
     }
   } catch(e) { err.textContent = '❌ ' + e.message; }
@@ -713,7 +750,6 @@ function logout() {
   document.getElementById('adminContent').innerHTML = '';
 }
 
-// Restore session on reload
 (function() {
   const saved = sessionStorage.getItem('cu_admin');
   if (saved) {
@@ -746,14 +782,14 @@ function loadSection(type) {
         <div id="msg"></div>
       </div>`;
     const cur = document.getElementById('headerLogo').querySelector('img');
-    if (cur) document.getElementById('logoPreviewBox').innerHTML = `<img src="${cur.src}" alt="Current logo">`;
+    if (cur) document.getElementById('logoPreviewBox').innerHTML = `<img src="${cur.src}" alt="logo">`;
   }
 
   else if (type === 'venues') {
     c.innerHTML = `
       <div class="admin-section-title">📍 Add Venue</div>
       <div class="admin-form">
-        <input id="vname"    placeholder="Venue name">
+        <input id="vname"    placeholder="Venue name *">
         <textarea id="vinfo" placeholder="Event details / directions…"></textarea>
         <input id="vtimings" placeholder="Timings (e.g. 10:00 AM – 5:00 PM)">
         <button class="btn" onclick="addVenue()">Add Venue</button>
@@ -764,6 +800,11 @@ function loadSection(type) {
   else if (type === 'media') {
     c.innerHTML = `
       <div class="admin-section-title">🎬 Upload Highlight Photo</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        Preset: <strong style="color:var(--accent)">CU FEST UPLOAD</strong><br>
+        ⚠️ Must be set to <strong>Unsigned</strong> in Cloudinary dashboard<br>
+        (Settings → Upload → Upload Presets → Edit → Signing Mode: Unsigned)
+      </p>
       <div class="admin-form">
         <input type="file" id="mediaFile" accept="image/*">
         <button class="btn" onclick="uploadMedia()">Upload Photo</button>
@@ -775,11 +816,11 @@ function loadSection(type) {
     c.innerHTML = `
       <div class="admin-section-title">🏆 Add Winner</div>
       <div class="admin-form">
-        <input id="winnerName"       placeholder="Winner / Team name *">
-        <input id="winnerUID"        placeholder="UID (optional)">
-        <input id="winnerDept"       placeholder="Department (optional)">
-        <input id="winnerCategory"   placeholder="Category / Event name (optional)">
-        <input id="winnerPosition"   placeholder="Position (e.g. 1st Place) (optional)">
+        <input id="winnerName"     placeholder="Winner / Team name *">
+        <input id="winnerUID"      placeholder="UID (optional)">
+        <input id="winnerDept"     placeholder="Department (optional)">
+        <input id="winnerCategory" placeholder="Event / Category (optional)">
+        <input id="winnerPosition" placeholder="Position e.g. 1st Place (optional)">
         <button class="btn" onclick="addWinner()">Add Winner</button>
         <div id="msg"></div>
       </div>`;
@@ -807,37 +848,37 @@ function loadSection(type) {
   c.scrollIntoView({ behavior: 'smooth' });
 }
 
-/* ── Upload highlight ── */
+/* ── Upload Media ── */
 async function uploadMedia() {
   const file = document.getElementById('mediaFile').files[0];
   if (!file) { showMsg('Please select an image first', true); return; }
   document.getElementById('msg').innerHTML = '<div class="loading"><div class="spinner"></div>Uploading…</div>';
   try {
     const url = await uploadToCloudinary(file);
-    const { data } = await sb.from('settings').select('value').eq('id','media_urls').maybeSingle();
-    const existing = data?.value ? JSON.parse(data.value) : [];
-    existing.unshift(url);
-    await saveMediaUrls(existing);
+    const { data: existing } = await sb.from('settings').select('value').eq('id','media_urls').maybeSingle();
+    const arr = existing?.value ? JSON.parse(existing.value) : [];
+    arr.unshift(url);
+    await saveMediaUrls(arr);
     showMsg('Photo uploaded successfully!');
     document.getElementById('mediaFile').value = '';
     loadMedia();
   } catch(err) { showMsg(err.message, true); }
 }
 
-/* ── Add Venue — FIX: now saves Timings field too ── */
+/* ── Add Venue ── */
 async function addVenue() {
   const name    = document.getElementById('vname').value.trim();
   const info    = document.getElementById('vinfo').value.trim();
   const timings = document.getElementById('vtimings').value.trim();
-  if (!name) { showMsg('Enter venue name', true); return; }
+  if (!name) { showMsg('Enter a venue name', true); return; }
   try {
     const { error } = await sb.from('venues').insert([{
       "Venue": name,
       "Event Details": info,
       "Timings": timings
     }]);
-    if (error) throw new Error(error.message);
-    showMsg('Venue added successfully');
+    if (error) throw new Error('Supabase: ' + error.message);
+    showMsg('Venue added successfully!');
     document.getElementById('vname').value    = '';
     document.getElementById('vinfo').value    = '';
     document.getElementById('vtimings').value = '';
@@ -845,7 +886,7 @@ async function addVenue() {
   } catch(err) { showMsg(err.message, true); }
 }
 
-/* ── Add Winner — FIX: now saves all 4 fields (UID, Department, Category, Position) ── */
+/* ── Add Winner ── */
 async function addWinner() {
   const name     = document.getElementById('winnerName').value.trim();
   const uid      = document.getElementById('winnerUID').value.trim();
@@ -861,8 +902,8 @@ async function addWinner() {
       "Category": category,
       "Position": position
     }]);
-    if (error) throw new Error(error.message);
-    showMsg('Winner added successfully');
+    if (error) throw new Error('Supabase: ' + error.message);
+    showMsg('Winner added successfully!');
     document.getElementById('winnerName').value     = '';
     document.getElementById('winnerUID').value      = '';
     document.getElementById('winnerDept').value     = '';
@@ -877,13 +918,17 @@ async function loadDeleteWinnerList() {
   const { data, error } = await sb.from('winners').select('*').order('created_at', { ascending: true });
   const list = document.getElementById('deleteWinnerList');
   if (error || !data?.length) { list.innerHTML = '<div class="empty">No winners to delete</div>'; return; }
-  list.innerHTML = data.map((w, i) => `
-    <div class="list-card" style="margin-bottom:8px;">
-      <span class="rank-label">${medals[i] || '🎖️'}</span>
-      <span class="team-name">${escHtml(w["Name"])}${w["Category"] ? ` — ${escHtml(w["Category"])}` : ''}</span>
-      <button class="btn btn-danger" style="width:auto;padding:4px 12px;font-size:12px;margin:0;"
-              onclick="deleteWinner(${w.id})">Delete</button>
-    </div>`).join('');
+  list.innerHTML = data.map((w, i) => {
+    const name = w["Name"] || w["name"] || 'Unknown';
+    const cat  = w["Category"] || w["category"] || '';
+    return `
+      <div class="list-card" style="margin-bottom:8px;">
+        <span class="rank-label">${medals[i] || '🎖️'}</span>
+        <span class="team-name">${escHtml(name)}${cat ? ` — ${escHtml(cat)}` : ''}</span>
+        <button class="btn btn-danger" style="width:auto;padding:4px 12px;font-size:12px;margin:0;"
+                onclick="deleteWinner(${w.id})">Delete</button>
+      </div>`;
+  }).join('');
 }
 
 async function deleteWinner(id) {
