@@ -143,6 +143,16 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 <div id="leaderboard" class="page active">
   <h3>🏆 Leaderboard</h3>
 
+  <div id="teamDetail" class="page">
+  <h3 id="detailName"></h3>
+  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
+
+  <h4>Category Breakdown</h4>
+  <div id="categoryList"></div>
+
+  <button onclick="show('leaderboard')">⬅ Back</button>
+</div>
+
   <!-- 🔍 SEARCH BAR (PASTE HERE) -->
   <input 
     type="text" 
@@ -174,15 +184,6 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 <div id="winnerList"></div>
 </div>
 
-<div id="teamDetail" class="page">
-  <h3 id="detailName"></h3>
-  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
-
-  <h4>Category Breakdown</h4>
-  <div id="categoryList"></div>
-
-  <button onclick="show('leaderboard')">⬅ Back</button>
-</div>
 
 <!-- ADMIN -->
 <div id="admin" class="page">
@@ -501,21 +502,15 @@ winnerList.innerHTML+=`<div class="card">${d.data().name}</div>`;
 
 function searchTeam(){
   const input = document.getElementById("searchInput").value.toLowerCase();
+  const allCards = document.querySelectorAll(".list-card, .podium-item");
 
-  // reload full leaderboard first
-  loadLeaderboard();
-
-  setTimeout(()=>{
-    const cards = document.querySelectorAll(".list-card");
-
-    cards.forEach(card=>{
-      if(card.innerText.toLowerCase().includes(input)){
-        card.style.display = "flex";
-      } else {
-        card.style.display = "none";
-      }
-    });
-  },200);
+  allCards.forEach(card=>{
+    if(card.innerText.toLowerCase().includes(input)){
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
 }
 
 </script>
