@@ -271,14 +271,17 @@ async function loadLeaderboard(){
     const board = document.getElementById("board");
     board.innerHTML = "";
 
-    // SORT BY SCORE
-    data.sort((a,b)=>parseInt(b.score)-parseInt(a.score));
+    // SORT BY POINTS
+    data.sort((a,b)=>parseInt(b.Points || 0) - parseInt(a.Points || 0));
 
     data.forEach((team,i)=>{
       board.innerHTML += `
         <div class="card">
-          <h3>#${i+1} ${team.name}</h3>
-          <p>Score: ${team.score}</p>
+          <h3>#${i+1} ${team.Department || "N/A"}</h3>
+          <p>Category: ${team.Category || "-"}</p>
+          <p>Points: ${team.Points || 0}</p>
+          <p>Live Score: ${team.LiveScore || "-"}</p>
+          <p>Venue: ${team.Venue || "-"}</p>
         </div>
       `;
     });
@@ -289,6 +292,9 @@ async function loadLeaderboard(){
       "<p>⚠️ Failed to load leaderboard</p>";
   }
 }
+
+setInterval(loadLeaderboard, 5000);
+loadLeaderboard();
 
 /* AUTO REFRESH */
 setInterval(loadLeaderboard, 5000);
