@@ -108,6 +108,14 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
   justify-content:space-between;
   cursor:pointer;
 }
+#searchInput{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -127,8 +135,17 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 <!-- PAGES -->
 
 <div id="leaderboard" class="page active">
-<h3>🏆 Leaderboard</h3>
-<div id="board"></div>
+  <h3>🏆 Leaderboard</h3>
+
+  <!-- 🔍 SEARCH BAR (PASTE HERE) -->
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Search Department..." 
+    onkeyup="searchTeam()"
+  >
+
+  <div id="board"></div>
 </div>
 
 <div id="venues" class="page">
@@ -389,7 +406,7 @@ async function loadLeaderboard(){
   `;
 
   // 📋 REST LIST
-  teams.slice(3).forEach((team,i)=>{
+  teams.slice(3, 15).forEach((team,i)=>{
     board.innerHTML += `
       <div class="list-card" onclick="openDetails('${team.name}')">
         <div>#${i+4} ${team.name}</div>
@@ -438,6 +455,18 @@ s.forEach(d=>{
 winnerList.innerHTML+=`<div class="card">${d.data().name}</div>`;
 });
 });
+function searchTeam(){
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  const cards = document.querySelectorAll(".list-card");
+
+  cards.forEach(card=>{
+    if(card.innerText.toLowerCase().includes(input)){
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+}
 
 </script>
 
