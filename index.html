@@ -154,7 +154,22 @@ body {
 .venue-card:hover { border-color: var(--accent2); transform: translateX(3px); }
 .venue-icon { font-size: 24px; }
 .venue-name { font-weight: 600; font-size: 15px; }
-.venue-detail-info { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-size: 14px; line-height: 1.7; color: var(--muted); white-space: pre-wrap; }
+
+/* ── VENUE DETAIL ── */
+.venue-detail-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
+}
+.venue-detail-row {
+  display: flex; gap: 12px; padding: 13px 16px;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.venue-detail-row:last-child { border-bottom: none; }
+.venue-detail-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); font-weight: 600; min-width: 80px; padding-top: 1px;
+}
+.venue-detail-value { font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
 
 /* ── MEDIA ── */
 .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -163,10 +178,19 @@ body {
 .media-item:hover img { transform: scale(1.05); }
 
 /* ── WINNERS ── */
-.winner-card { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; animation: fadeIn 0.3s ease both; }
-.winner-medal { font-size: 26px; }
-.winner-name  { font-weight: 600; font-size: 14px; }
-.winner-sub   { font-size: 12px; color: var(--muted); }
+.winner-card {
+  display: flex; align-items: flex-start; gap: 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 10px; animation: fadeIn 0.3s ease both;
+}
+.winner-medal { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+.winner-name  { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.winner-sub   { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.winner-tag {
+  display: inline-block; background: rgba(240,192,64,0.12);
+  color: var(--accent); border-radius: 20px; padding: 2px 8px;
+  font-size: 11px; font-weight: 600; margin: 2px 2px 0 0;
+}
 
 /* ── NAV ── */
 .nav { height: var(--nav-h); display: flex; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
@@ -267,7 +291,7 @@ body {
     <div id="venueDetail" class="page">
       <button class="back-btn" onclick="show('venues')">← Back to Venues</button>
       <div class="page-title" id="venueTitle"></div>
-      <div class="venue-detail-info" id="venueInfo"></div>
+      <div id="venueDetailContent"></div>
     </div>
 
     <!-- HIGHLIGHTS -->
@@ -346,6 +370,7 @@ const SUPABASE_ANON     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const SHEET_URL         = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 const CLOUDINARY_CLOUD  = "dyt6iai2c";
 const CLOUDINARY_PRESET = "CU_FEST_UPLOAD";
+const CLOUDINARY_API_KEY = "567731757472957";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -390,24 +415,25 @@ function showMsg(text, isError = false) {
     : `<div class="success-msg">✅ ${escHtml(text)}</div>`;
 }
 
+/* ── FIX: Cloudinary upload now includes api_key ── */
 async function uploadToCloudinary(file) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
+  fd.append('api_key', CLOUDINARY_API_KEY);
   const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method:'POST', body:fd });
   const data = await res.json();
-  if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed — check your Cloudinary preset name');
+  if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed — check Cloudinary preset is set to "Unsigned"');
   return data.secure_url;
 }
 
 /* ══════════════════════════
    LOGO
-   Supabase table needed:
-   settings (id text PK, value text)
+   FIX: was loading wrong key 'CU-FEST.png', now loads 'logo_url'
 ══════════════════════════ */
 async function loadLogo() {
   try {
-    const { data } = await sb.from('settings').select('value').eq('id','CU-FEST.png').maybeSingle();
+    const { data } = await sb.from('settings').select('value').eq('id','logo_url').maybeSingle();
     if (data?.value) applyLogo(data.value);
   } catch(_) {}
 }
@@ -534,6 +560,7 @@ setInterval(loadLeaderboard, 10000);
 
 /* ══════════════════════════
    VENUES
+   FIX: Now shows Venue, Event Details AND Timings properly
 ══════════════════════════ */
 async function loadVenues() {
   const { data, error } = await sb.from('venues').select('*').order('created_at', { ascending: false });
@@ -543,26 +570,50 @@ async function loadVenues() {
     return;
   }
   list.innerHTML = data.map(v => `
-  <div class="venue-card" onclick="openVenue(this.dataset.name,this.dataset.info)"
-       data-name="${escHtml(v["Venue"])}"
-       data-info="${escHtml((v["Event Details"] || '') + ' | ' + (v["Timings"] || ''))}">
-    <span class="venue-icon">🏟️</span>
-    <span class="venue-name">${escHtml(v["Venue"])}</span>
-  </div>
-`).join('');
+    <div class="venue-card" onclick="openVenue(${v.id})">
+      <span class="venue-icon">🏟️</span>
+      <div>
+        <div class="venue-name">${escHtml(v["Venue"])}</div>
+        ${v["Timings"] ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;">🕐 ${escHtml(v["Timings"])}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // Store data globally for detail view
+  window._venuesData = data;
 }
 
-function openVenue(name, info) {
-  document.getElementById('venueTitle').textContent = name;
-  document.getElementById('venueInfo').textContent  = info || 'No details provided.';
+function openVenue(id) {
+  const v = window._venuesData?.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('venueTitle').textContent = v["Venue"] || '';
+
+  let rows = '';
+  if (v["Event Details"]) {
+    rows += `
+      <div class="venue-detail-row">
+        <span class="venue-detail-label">Details</span>
+        <span class="venue-detail-value">${escHtml(v["Event Details"])}</span>
+      </div>`;
+  }
+  if (v["Timings"]) {
+    rows += `
+      <div class="venue-detail-row">
+        <span class="venue-detail-label">Timings</span>
+        <span class="venue-detail-value">${escHtml(v["Timings"])}</span>
+      </div>`;
+  }
+  if (!rows) {
+    rows = `<div class="venue-detail-row"><span class="venue-detail-value" style="color:var(--muted)">No details provided.</span></div>`;
+  }
+
+  document.getElementById('venueDetailContent').innerHTML =
+    `<div class="venue-detail-card">${rows}</div>`;
   show('venueDetail');
 }
 
 /* ══════════════════════════
    MEDIA HIGHLIGHTS
-   Stored in settings table as JSON array of Cloudinary URLs
-   Row: { id: 'media_urls', value: '["url1","url2",...]' }
-   No separate media table required.
 ══════════════════════════ */
 async function loadMedia() {
   try {
@@ -588,6 +639,8 @@ async function saveMediaUrls(urls) {
 
 /* ══════════════════════════
    WINNERS
+   FIX: Removed broken {escHtml(w.na typo
+        Now shows Name, UID, Department, Category, Position as tags
 ══════════════════════════ */
 const medals = ['🥇','🥈','🥉'];
 
@@ -598,20 +651,26 @@ async function loadWinners() {
     list.innerHTML = '<div class="empty"><div class="e-icon">🏆</div>No winners announced yet</div>';
     return;
   }
-  list.innerHTML = data.map((w, i) => `
-    <div class="winner-card">
-      <span class="winner-medal">${medals[i] || '🎖️'}</span>
-      <div>
-        {escHtml(w.na<div class="winner-name">${escHtml(w["Name"])}</div>
-<div class="winner-sub">
-  ${escHtml(w["Department"] || '')} • ${escHtml(w["Category"] || '')} • ${escHtml(w["Position"] || '')}
-</div>
-      </div>
-    </div>`).join('');
+  list.innerHTML = data.map((w, i) => {
+    const tags = [w["UID"], w["Department"], w["Category"], w["Position"]]
+      .filter(Boolean)
+      .map(t => `<span class="winner-tag">${escHtml(t)}</span>`)
+      .join('');
+    return `
+      <div class="winner-card">
+        <span class="winner-medal">${medals[i] || '🎖️'}</span>
+        <div>
+          <div class="winner-name">${escHtml(w["Name"] || '')}</div>
+          ${tags ? `<div class="winner-sub" style="margin-top:4px;">${tags}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 /* ══════════════════════════
    ADMIN — Login / Logout
+   FIX: Added .limit(1) to prevent false login on empty table query
+        Cleared loginErr before new attempt so stale errors don't persist
 ══════════════════════════ */
 async function handleLogin() {
   const u   = document.getElementById('adminUser').value.trim();
@@ -619,10 +678,19 @@ async function handleLogin() {
   const err = document.getElementById('loginErr');
   if (!u || !p) { err.textContent = 'Enter username & password'; return; }
   err.textContent = 'Checking…';
+
   try {
-    const { data, error } = await sb.from('admins').select('id').eq('Name', u).eq('Pass', p)
+    const { data, error } = await sb
+      .from('admins')
+      .select('id')
+      .eq('Name', u)
+      .eq('Pass', p)
+      .limit(1);
+
     if (error) { err.textContent = '❌ ' + error.message; return; }
-    if (data?.length) {
+
+    /* FIX: Must have exactly 1 matching row — empty array = wrong credentials */
+    if (data && data.length === 1) {
       sessionStorage.setItem('cu_admin', u);
       document.getElementById('loginBox').style.display   = 'none';
       document.getElementById('adminPanel').style.display = 'block';
@@ -630,10 +698,11 @@ async function handleLogin() {
       err.textContent = '';
     } else {
       err.textContent = '❌ Wrong username or password';
+      /* FIX: Clear password field after failed attempt */
+      document.getElementById('adminPass').value = '';
     }
   } catch(e) { err.textContent = '❌ ' + e.message; }
 }
-
 
 function logout() {
   sessionStorage.removeItem('cu_admin');
@@ -684,8 +753,9 @@ function loadSection(type) {
     c.innerHTML = `
       <div class="admin-section-title">📍 Add Venue</div>
       <div class="admin-form">
-        <input id="vname" placeholder="Venue name">
-        <textarea id="vinfo" placeholder="Venue details / directions…"></textarea>
+        <input id="vname"    placeholder="Venue name">
+        <textarea id="vinfo" placeholder="Event details / directions…"></textarea>
+        <input id="vtimings" placeholder="Timings (e.g. 10:00 AM – 5:00 PM)">
         <button class="btn" onclick="addVenue()">Add Venue</button>
         <div id="msg"></div>
       </div>`;
@@ -705,8 +775,11 @@ function loadSection(type) {
     c.innerHTML = `
       <div class="admin-section-title">🏆 Add Winner</div>
       <div class="admin-form">
-        <input id="winnerName"  placeholder="Winner / Team name">
-        <input id="winnerEvent" placeholder="Event name (optional)">
+        <input id="winnerName"       placeholder="Winner / Team name *">
+        <input id="winnerUID"        placeholder="UID (optional)">
+        <input id="winnerDept"       placeholder="Department (optional)">
+        <input id="winnerCategory"   placeholder="Category / Event name (optional)">
+        <input id="winnerPosition"   placeholder="Position (e.g. 1st Place) (optional)">
         <button class="btn" onclick="addWinner()">Add Winner</button>
         <div id="msg"></div>
       </div>`;
@@ -734,7 +807,7 @@ function loadSection(type) {
   c.scrollIntoView({ behavior: 'smooth' });
 }
 
-/* ── Upload highlight (Cloudinary → stored as JSON in settings) ── */
+/* ── Upload highlight ── */
 async function uploadMedia() {
   const file = document.getElementById('mediaFile').files[0];
   if (!file) { showMsg('Please select an image first', true); return; }
@@ -751,42 +824,50 @@ async function uploadMedia() {
   } catch(err) { showMsg(err.message, true); }
 }
 
-/* ── Add Venue ── */
+/* ── Add Venue — FIX: now saves Timings field too ── */
 async function addVenue() {
-  const name = document.getElementById('vname').value.trim();
-  const info = document.getElementById('vinfo').value.trim();
+  const name    = document.getElementById('vname').value.trim();
+  const info    = document.getElementById('vinfo').value.trim();
+  const timings = document.getElementById('vtimings').value.trim();
   if (!name) { showMsg('Enter venue name', true); return; }
   try {
     const { error } = await sb.from('venues').insert([{
-  "Venue": name,
-  "Event Details": info,
-  "Timings": ""
-}]);
+      "Venue": name,
+      "Event Details": info,
+      "Timings": timings
+    }]);
     if (error) throw new Error(error.message);
     showMsg('Venue added successfully');
-    document.getElementById('vname').value = '';
-    document.getElementById('vinfo').value = '';
+    document.getElementById('vname').value    = '';
+    document.getElementById('vinfo').value    = '';
+    document.getElementById('vtimings').value = '';
     loadVenues();
   } catch(err) { showMsg(err.message, true); }
 }
 
-/* ── Add Winner ── */
+/* ── Add Winner — FIX: now saves all 4 fields (UID, Department, Category, Position) ── */
 async function addWinner() {
-  const name  = document.getElementById('winnerName').value.trim();
-  const event = document.getElementById('winnerEvent').value.trim();
+  const name     = document.getElementById('winnerName').value.trim();
+  const uid      = document.getElementById('winnerUID').value.trim();
+  const dept     = document.getElementById('winnerDept').value.trim();
+  const category = document.getElementById('winnerCategory').value.trim();
+  const position = document.getElementById('winnerPosition').value.trim();
   if (!name) { showMsg('Enter winner name', true); return; }
   try {
     const { error } = await sb.from('winners').insert([{
-  "Name": name,
-  "UID": "",
-  "Department": "",
-  "Category": event,
-  "Position": ""
-}]);
+      "Name": name,
+      "UID": uid,
+      "Department": dept,
+      "Category": category,
+      "Position": position
+    }]);
     if (error) throw new Error(error.message);
     showMsg('Winner added successfully');
-    document.getElementById('winnerName').value  = '';
-    document.getElementById('winnerEvent').value = '';
+    document.getElementById('winnerName').value     = '';
+    document.getElementById('winnerUID').value      = '';
+    document.getElementById('winnerDept').value     = '';
+    document.getElementById('winnerCategory').value = '';
+    document.getElementById('winnerPosition').value = '';
     loadWinners();
   } catch(err) { showMsg(err.message, true); }
 }
@@ -799,7 +880,7 @@ async function loadDeleteWinnerList() {
   list.innerHTML = data.map((w, i) => `
     <div class="list-card" style="margin-bottom:8px;">
       <span class="rank-label">${medals[i] || '🎖️'}</span>
-      <span class="team-name">${escHtml(w["Name"])}${w.event ? ` — ${escHtml(w.event)}` : ''}</span>
+      <span class="team-name">${escHtml(w["Name"])}${w["Category"] ? ` — ${escHtml(w["Category"])}` : ''}</span>
       <button class="btn btn-danger" style="width:auto;padding:4px 12px;font-size:12px;margin:0;"
               onclick="deleteWinner(${w.id})">Delete</button>
     </div>`).join('');
