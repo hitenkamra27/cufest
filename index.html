@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 
 <style>
 /* ── RESET & VARIABLES ── */
@@ -772,14 +772,9 @@ function show(id) {
 /* ════════════════════════════════
    FIREBASE — Replace with your real config
 ════════════════════════════════ */
-const firebaseConfig = {
-  apiKey:      "YOUR_API_KEY",
-  authDomain:  "YOUR_PROJECT.firebaseapp.com",
-  projectId:   "YOUR_PROJECT_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const supabase = window.supabase.createClient("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zYWllcGRnZ2Fha2djZGFiamJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTM0MDUsImV4cCI6MjA5MDA4OTQwNX0.XHUGYYKX7TwUE6I5pPBBiI81LBx4Icn1KfXLx4Ib_NA",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zYWllcGRnZ2Fha2djZGFiamJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTM0MDUsImV4cCI6MjA5MDA4OTQwNX0.XHUGYYKX7TwUE6I5pPBBiI81LBx4Icn1KfXLx4Ib_NA" 
+);
 
 
 /* ════════════════════════════════
@@ -904,33 +899,6 @@ setInterval(loadLeaderboard, 10000);
 
 
 /* ════════════════════════════════
-   VENUES (Firebase)
-════════════════════════════════ */
-db.collection("venues").onSnapshot(snapshot => {
-  const list = document.getElementById('venueList');
-  if (snapshot.empty) {
-    list.innerHTML = '<div class="empty"><div class="e-icon">📍</div>No venues added yet</div>';
-    return;
-  }
-  list.innerHTML = '';
-  snapshot.forEach(doc => {
-    const v = doc.data();
-    list.innerHTML += `
-      <div class="venue-card" onclick="openVenue('${escHtml(v.name)}','${escHtml(v.info)}')">
-        <span class="venue-icon">🏟️</span>
-        <span class="venue-name">${escHtml(v.name)}</span>
-      </div>`;
-  });
-}, err => console.error("Venues error:", err));
-
-function openVenue(name, info) {
-  document.getElementById('venueTitle').textContent = name;
-  document.getElementById('venueInfo').textContent  = info;
-  show('venueDetail');
-}
-
-
-/* ════════════════════════════════
    MEDIA HIGHLIGHTS (Firebase)
 ════════════════════════════════ */
 db.collection("media").onSnapshot(snapshot => {
@@ -980,27 +948,41 @@ db.collection("winners").onSnapshot(snapshot => {
 /* ════════════════════════════════
    ADMIN — Login
 ════════════════════════════════ */
-function handleLogin() {
+async function handleLogin(){
   const u = document.getElementById('adminUser').value.trim();
   const p = document.getElementById('adminPass').value;
   const err = document.getElementById('loginErr');
 
-  if (u === "Hiten" && p === "1234") {
-    document.getElementById('loginBox').style.display   = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    err.textContent = '';
-  } else {
-    err.textContent = '❌ Wrong username or password';
-    document.getElementById('adminPass').value = '';
+  if(!u || !p){
+    err.textContent = "Enter username & password";
+    return;
   }
-}
 
-function logout() {
-  document.getElementById('adminPanel').style.display = 'none';
-  document.getElementById('loginBox').style.display   = 'block';
-  document.getElementById('adminUser').value = '';
-  document.getElementById('adminPass').value = '';
-  document.getElementById('adminContent').innerHTML = '';
+  try{
+    const { data, error } = await supabase
+      .from("admins")
+      .select("*")
+      .eq("name", u)
+      .eq("pass", p);
+
+    if(error){
+      console.error(error);
+      err.textContent = "Login error";
+      return;
+    }
+
+    if(data.length){
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      err.textContent = "";
+    } else {
+      err.textContent = "❌ Wrong username or password";
+    }
+
+  }catch(e){
+    console.error(e);
+    err.textContent = "Login error";
+  }
 }
 
 
@@ -1061,31 +1043,94 @@ function showMsg(text) {
   if (m) m.innerHTML = `<div class="success-msg">✅ ${text}</div>`;
 }
 
-function addAdmin() {
+async function addAdmin(){
   const name = document.getElementById('newAdmin').value.trim();
   const pass = document.getElementById('newPass').value.trim();
-  if (!name || !pass) { alert('Fill in both fields'); return; }
-  db.collection("admins").add({ name, pass })
-    .then(() => showMsg('Admin added successfully'))
-    .catch(e => alert('Error: ' + e.message));
+
+  if(!name || !pass){
+    alert("Fill all fields");
+    return;
+  }
+
+  try{
+    const { error } = await supabase
+      .from("admins")
+      .insert([{ name, pass }]);
+
+    if(error){
+      alert("Error: " + error.message);
+    } else {
+      showMsg("Admin added successfully");
+
+      // clear inputs
+      document.getElementById('newAdmin').value = "";
+      document.getElementById('newPass').value = "";
+    }
+
+  }catch(e){
+    console.error(e);
+    alert("Something went wrong");
+  }
 }
 
-function addVenue() {
+async function addVenue(){
   const name = document.getElementById('vname').value.trim();
   const info = document.getElementById('vinfo').value.trim();
-  if (!name) { alert('Enter venue name'); return; }
-  db.collection("venues").add({ name, info })
-    .then(() => showMsg('Venue added successfully'))
-    .catch(e => alert('Error: ' + e.message));
+
+  if(!name){
+    alert("Enter venue name");
+    return;
+  }
+
+  try{
+    const { error } = await supabase
+      .from("venues")
+      .insert([{ name, info }]);
+
+    if(error){
+      alert("Error: " + error.message);
+    } else {
+      showMsg("Venue added successfully");
+
+      // clear inputs
+      document.getElementById('vname').value = "";
+      document.getElementById('vinfo').value = "";
+    }
+
+  }catch(e){
+    console.error(e);
+    alert("Something went wrong");
+  }
 }
 
-function addWinner() {
+async function addWinner(){
   const name  = document.getElementById('winnerName').value.trim();
   const event = document.getElementById('winnerEvent').value.trim();
-  if (!name) { alert('Enter winner name'); return; }
-  db.collection("winners").add({ name, event })
-    .then(() => showMsg('Winner added successfully'))
-    .catch(e => alert('Error: ' + e.message));
+
+  if(!name){
+    alert("Enter winner name");
+    return;
+  }
+
+  try{
+    const { error } = await supabase
+      .from("winners")
+      .insert([{ name, event }]);
+
+    if(error){
+      alert("Error: " + error.message);
+    } else {
+      showMsg("Winner added successfully");
+
+      // clear inputs
+      document.getElementById('winnerName').value = "";
+      document.getElementById('winnerEvent').value = "";
+    }
+
+  }catch(e){
+    console.error(e);
+    alert("Something went wrong");
+  }
 }
 
 /* ── Cloudinary Upload ── */
@@ -1123,6 +1168,57 @@ function uploadImage() {
   });
 }
 
+async function loadVenues(){
+  const { data } = await supabase.from("venues").select("*");
+
+  const list = document.getElementById('venueList');
+  list.innerHTML = "";
+
+  if(!data || !data.length){
+    list.innerHTML = '<div class="empty">No venues added</div>';
+    return;
+  }
+
+  data.forEach(v=>{
+    list.innerHTML += `
+      <div class="venue-card" onclick="openVenue('${v.name}','${v.info}')">
+        <span class="venue-icon">🏟️</span>
+        <span class="venue-name">${v.name}</span>
+      </div>
+    `;
+  });
+}
+
+async function loadWinners(){
+  const { data } = await supabase.from("winners").select("*");
+
+  const list = document.getElementById('winnerList');
+  list.innerHTML = "";
+
+  if(!data || !data.length){
+    list.innerHTML = '<div class="empty">No winners yet</div>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+
+  data.forEach((w,i)=>{
+    list.innerHTML += `
+      <div class="winner-card">
+        <span class="winner-medal">${medals[i] || '🎖️'}</span>
+        <div>
+          <div class="winner-name">${w.name}</div>
+          ${w.event ? `<div class="winner-sub">${w.event}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+}
+
+loadLeaderboard();
+
+loadVenues();
+loadWinners();
 
 /* ════════════════════════════════
    UTILITY
