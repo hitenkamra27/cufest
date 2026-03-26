@@ -116,6 +116,12 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
   border:1px solid #ddd;
   font-size:14px;
 }
+.detail-card{
+  background:#f3f4f6;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+}
 </style>
 </head>
 
@@ -166,6 +172,16 @@ input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px
 <div id="winners" class="page">
 <h3>🥇 Winners</h3>
 <div id="winnerList"></div>
+</div>
+
+<div id="teamDetail" class="page">
+  <h3 id="detailName"></h3>
+  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
+
+  <h4>Category Breakdown</h4>
+  <div id="categoryList"></div>
+
+  <button onclick="show('leaderboard')">⬅ Back</button>
 </div>
 
 <!-- ADMIN -->
@@ -373,7 +389,9 @@ async function loadLeaderboard(){
 
   const top3 = teams.slice(0,3);
 
-  function openDetails(name){
+loadLeaderboard();
+
+function openDetails(name){
   const url = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 
   fetch(url)
@@ -446,20 +464,6 @@ async function loadLeaderboard(){
   });
 }
 
-setInterval(loadLeaderboard,5000);
-loadLeaderboard();
-function openDetails(name){
-  alert("Open details for " + name);
-}
-<div id="teamDetail" class="page">
-  <h3 id="detailName"></h3>
-  <p><b>Total Points:</b> <span id="detailPoints"></span></p>
-
-  <h4>Category Breakdown</h4>
-  <div id="categoryList"></div>
-
-  <button onclick="show('leaderboard')">⬅ Back</button>
-</div>
 
 /* AUTO REFRESH */
 setInterval(loadLeaderboard, 5000);
