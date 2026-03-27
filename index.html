@@ -2,28 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CU FEST">
-<meta name="application-name" content="CU FEST">
-<meta name="theme-color" content="#f0c040">
-<meta name="description" content="Live leaderboard, venues, highlights and winners for CU Annual University Festival">
-
-<!-- PWA Manifest -->
-<link rel="manifest" href="./manifest.json">
-
-<!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="152x152" href="./icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="./icons/icon-144.png">
-<link rel="apple-touch-icon" sizes="128x128" href="./icons/icon-128.png">
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="96x96" href="./icons/icon-96.png">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CU FEST</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -33,25 +12,11 @@
   --bg:#0a0a0f;--surface:#13131c;--surface2:#1c1c2e;--border:#2a2a3e;
   --accent:#f0c040;--accent2:#ff6b35;--text:#f0f0f8;--muted:#7a7a9a;
   --success:#4ade80;--radius:14px;--nav-h:64px;--header-h:56px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;min-height:100dvh;}
-.app{width:100%;max-width:430px;height:100vh;height:100dvh;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;}
+.app{width:100%;max-width:430px;height:100vh;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;}
 
-/* INSTALL BANNER */
-#installBanner{display:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;padding:10px 16px;align-items:center;gap:10px;flex-shrink:0;animation:slideDown 0.3s ease;}
-#installBanner.show{display:flex;}
-@keyframes slideDown{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.install-text{flex:1;font-size:13px;font-weight:600;line-height:1.3;}
-.install-btn{background:#000;color:var(--accent);border:none;padding:7px 14px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;}
-.install-close{background:none;border:none;color:#000;font-size:18px;cursor:pointer;padding:0 4px;opacity:0.6;}
-
-/* OFFLINE INDICATOR */
-#offlineBar{display:none;background:#ff4444;color:#fff;text-align:center;font-size:12px;padding:6px;flex-shrink:0;font-weight:600;letter-spacing:0.5px;}
-#offlineBar.show{display:block;}
-
-/* SPLASH */
+/* SPLASH — no drop shadow */
 #splash{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;gap:16px;transition:opacity 0.5s ease;}
 #splash.hidden{opacity:0;pointer-events:none;}
 .splash-logo{width:90px;height:90px;border-radius:24px;background:transparent;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#000;overflow:hidden;}
@@ -63,7 +28,7 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 @keyframes fill{to{width:100%;}}
 
 /* HEADER */
-.header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 18px;padding-top:var(--safe-top);background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
 .header-brand{display:flex;align-items:center;gap:10px;}
 .header-logo{width:34px;height:34px;border-radius:8px;background:transparent;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#000;overflow:hidden;flex-shrink:0;}
 .header-logo img{width:100%;height:100%;object-fit:contain;}
@@ -74,7 +39,7 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 
 /* PAGES */
 .pages{flex:1;overflow:hidden;position:relative;}
-.page{display:none;height:100%;overflow-y:auto;padding:16px;padding-bottom:calc(80px + var(--safe-bottom));animation:fadeIn 0.25s ease;}
+.page{display:none;height:100%;overflow-y:auto;padding:16px;padding-bottom:80px;animation:fadeIn 0.25s ease;}
 .page.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 .page::-webkit-scrollbar{width:4px;}
@@ -140,6 +105,8 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 .media-item .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);transition:background 0.2s;}
 .media-item .play-overlay span{font-size:32px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));}
 .media-item:hover .play-overlay{background:rgba(0,0,0,0.18);}
+.media-delete-btn{position:absolute;top:6px;right:6px;background:rgba(255,40,40,0.85);border:none;color:#fff;font-size:13px;width:28px;height:28px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;font-weight:700;}
+.media-item:hover .media-delete-btn{display:flex;}
 
 /* LIGHTBOX */
 #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;}
@@ -155,6 +122,8 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 .winner-name{font-weight:600;font-size:14px;margin-bottom:4px;}
 .winner-sub{font-size:12px;color:var(--muted);line-height:1.5;}
 .winner-tag{display:inline-block;background:rgba(240,192,64,0.12);color:var(--accent);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;margin:2px 2px 0 0;}
+
+/* WINNER DETAIL PAGE */
 .winner-detail-hero{background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:16px;}
 .winner-detail-medal{font-size:52px;margin-bottom:8px;}
 .winner-detail-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;}
@@ -166,7 +135,7 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 .winner-detail-value{font-size:14px;color:var(--text);font-weight:500;}
 
 /* NAV */
-.nav{height:var(--nav-h);padding-bottom:var(--safe-bottom);display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
+.nav{height:var(--nav-h);display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
 .nav-btn{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:18px;color:var(--muted);transition:color 0.2s;position:relative;}
 .nav-btn span{font-size:9px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Sans',sans-serif;font-weight:600;}
 .nav-btn.active{color:var(--accent);}
@@ -202,6 +171,8 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 .loading{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
 .spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* INLINE EDIT FORM */
 .inline-edit{background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius);padding:14px;margin-top:10px;}
 .inline-edit input,.inline-edit textarea{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:8px;transition:border-color 0.2s;}
 .inline-edit input:focus,.inline-edit textarea:focus{border-color:var(--accent);}
@@ -214,6 +185,8 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 .icon-btn{background:none;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color 0.2s,color 0.2s;flex-shrink:0;}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 .icon-btn.danger:hover{border-color:#ff4444;color:#ff4444;}
+
+/* MEDIA ADMIN */
 .media-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
 .media-admin-item{border-radius:12px;overflow:hidden;aspect-ratio:1;background:var(--surface2);position:relative;}
 .media-admin-item img,.media-admin-item video{width:100%;height:100%;object-fit:cover;display:block;}
@@ -225,19 +198,9 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 <body>
 <div class="app">
 
-  <!-- INSTALL BANNER (shows when app can be installed) -->
-  <div id="installBanner">
-    <div class="install-text">📲 Install CU FEST as an app!</div>
-    <button class="install-btn" id="installBtn">Install</button>
-    <button class="install-close" id="installClose">✕</button>
-  </div>
-
-  <!-- OFFLINE BAR -->
-  <div id="offlineBar">⚡ You're offline — showing cached data</div>
-
   <!-- SPLASH -->
   <div id="splash">
-    <div class="splash-logo" id="splashLogo"><img src="./icons/icon-192.png" alt="CU FEST"></div>
+    <div class="splash-logo" id="splashLogo"></div>
     <div class="splash-title">CU FEST</div>
     <div class="splash-sub">ANNUAL UNIVERSITY FESTIVAL</div>
     <div class="progress-track"><div class="progress-fill"></div></div>
@@ -246,7 +209,7 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
   <!-- HEADER -->
   <div class="header">
     <div class="header-brand">
-      <div class="header-logo" id="headerLogo"><img src="./icons/icon-96.png" alt="CU"></div>
+      <div class="header-logo" id="headerLogo">CU</div>
       <div class="header-name">CU FEST</div>
     </div>
     <div class="header-live"><div class="live-dot"></div>Live</div>
@@ -359,47 +322,6 @@ const CLOUD_NAME    = "dyt6iai2c";
 const CLOUD_PRESET  = "CU_FEST_UPLOAD";
 const sb            = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-/* ─── SERVICE WORKER REGISTRATION ────────────────────────── */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.warn('SW failed:', err));
-  });
-}
-
-/* ─── PWA INSTALL PROMPT ─────────────────────────────────── */
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').classList.add('show');
-});
-document.getElementById('installBtn').addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') document.getElementById('installBanner').classList.remove('show');
-  deferredPrompt = null;
-});
-document.getElementById('installClose').addEventListener('click', () => {
-  document.getElementById('installBanner').classList.remove('show');
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').classList.remove('show');
-  deferredPrompt = null;
-});
-
-/* ─── OFFLINE DETECTION ──────────────────────────────────── */
-function updateOnlineStatus() {
-  const bar = document.getElementById('offlineBar');
-  if (!navigator.onLine) bar.classList.add('show');
-  else bar.classList.remove('show');
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-updateOnlineStatus();
-
 /* ─── SPLASH ─────────────────────────────────────────────── */
 setTimeout(() => {
   const s = document.getElementById('splash');
@@ -407,36 +329,13 @@ setTimeout(() => {
   setTimeout(() => s.style.display = 'none', 500);
 }, 2200);
 
-/* ─── LOGO ───────────────────────────────────────────────── */
-async function loadLogo() {
-  try {
-    const { data } = await sb.from('settings').select('value').eq('id','logo_url').maybeSingle();
-    if (data?.value) applyLogo(data.value);
-  } catch(_) {}
+/* ─── LOGO (embedded fallback) ───────────────────────────── */
+function applyEmbeddedLogos() {
+  // No embedded base64 — use text fallback until DB logo loads
+  document.getElementById('headerLogo').textContent = 'CU';
+  document.getElementById('splashLogo').textContent = '🎓';
 }
-function applyLogo(url) {
-  const img = `<img src="${escHtml(url)}" alt="Logo">`;
-  document.getElementById('headerLogo').innerHTML = img;
-  document.getElementById('splashLogo').innerHTML = img;
-}
-function previewLogo(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => document.getElementById('logoPreviewBox').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-  reader.readAsDataURL(file);
-}
-async function uploadLogo() {
-  const file = document.getElementById('logoFile').files[0];
-  if (!file) { showMsg('Please select an image first', true); return; }
-  document.getElementById('msg').innerHTML = '<div class="loading"><div class="spinner"></div>Uploading…</div>';
-  try {
-    const { url } = await uploadToCloudinary(file);
-    const { error } = await sb.from('settings').upsert({ id:'logo_url', value:url });
-    if (error) throw new Error('Supabase: ' + error.message);
-    applyLogo(url);
-    showMsg('Logo updated successfully!');
-  } catch(err) { showMsg(err.message, true); }
-}
+applyEmbeddedLogos();
 
 /* ─── NAV ────────────────────────────────────────────────── */
 const navlessPages = ['teamDetail','venueDetail','winnerDetail'];
@@ -475,7 +374,38 @@ async function uploadToCloudinary(file) {
   return { url: data.secure_url, type: isVideo ? 'video' : 'image' };
 }
 
-/* ─── LEADERBOARD ────────────────────────────────────────── */
+/* ─── LOGO ───────────────────────────────────────────────── */
+async function loadLogo() {
+  try {
+    const { data } = await sb.from('settings').select('value').eq('id','logo_url').maybeSingle();
+    if (data?.value) applyLogo(data.value);
+  } catch(_) {}
+}
+function applyLogo(url) {
+  const img = `<img src="${escHtml(url)}" alt="Logo">`;
+  document.getElementById('headerLogo').innerHTML = img;
+  document.getElementById('splashLogo').innerHTML = img;
+}
+function previewLogo(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => document.getElementById('logoPreviewBox').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+  reader.readAsDataURL(file);
+}
+async function uploadLogo() {
+  const file = document.getElementById('logoFile').files[0];
+  if (!file) { showMsg('Please select an image first', true); return; }
+  document.getElementById('msg').innerHTML = '<div class="loading"><div class="spinner"></div>Uploading…</div>';
+  try {
+    const { url } = await uploadToCloudinary(file);
+    const { error } = await sb.from('settings').upsert({ id:'logo_url', value:url });
+    if (error) throw new Error('Supabase: ' + error.message);
+    applyLogo(url);
+    showMsg('Logo updated successfully!');
+  } catch(err) { showMsg(err.message, true); }
+}
+
+/* ─── LEADERBOARD (1s polling) ───────────────────────────── */
 let allTeams = [];
 async function loadLeaderboard() {
   try {
@@ -489,6 +419,7 @@ async function loadLeaderboard() {
       grouped[dept] = (grouped[dept]||0) + pts;
     });
     const newTeams = Object.entries(grouped).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total);
+    // Only re-render if data actually changed
     if (JSON.stringify(newTeams) !== JSON.stringify(allTeams)) {
       allTeams = newTeams;
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -552,7 +483,7 @@ function openDetails(name) {
   }).catch(()=>alert('Could not load team details'));
 }
 loadLeaderboard();
-setInterval(loadLeaderboard, 1000);
+setInterval(loadLeaderboard, 1000); // 1-second real-time polling
 
 /* ─── VENUES ─────────────────────────────────────────────── */
 window._venuesData = [];
@@ -734,11 +665,12 @@ function logout() {
 /* ─── ADMIN SECTIONS ─────────────────────────────────────── */
 function loadSection(type) {
   const c = document.getElementById('adminContent');
+
   if (type==='logo') {
     c.innerHTML=`<div class="admin-section-title">🖼️ Upload Festival Logo</div>
       <div class="logo-preview-wrap">
         <div class="logo-preview-box" id="logoPreviewBox">🖼️</div>
-        <div class="logo-preview-info">Appears in header &amp; splash.<br>Square images work best.</div>
+        <div class="logo-preview-info">Appears in header &amp; splash.<br>Square images work best.<br>Supported: JPG, PNG, WebP.</div>
       </div>
       <div class="admin-form">
         <input type="file" id="logoFile" accept="image/*" onchange="previewLogo(this)">
@@ -748,6 +680,7 @@ function loadSection(type) {
     const cur = document.getElementById('headerLogo').querySelector('img');
     if (cur) document.getElementById('logoPreviewBox').innerHTML=`<img src="${cur.src}" alt="logo">`;
   }
+
   else if (type==='venues') {
     c.innerHTML=`<div class="admin-section-title">📍 Manage Venues</div>
       <div class="admin-form">
@@ -761,8 +694,12 @@ function loadSection(type) {
       <div id="adminVenueList"><div class="loading"><div class="spinner"></div>Loading…</div></div>`;
     loadAdminVenueList();
   }
+
   else if (type==='media') {
     c.innerHTML=`<div class="admin-section-title">🎬 Manage Highlights</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        Supports <strong style="color:var(--accent)">Photos &amp; Videos</strong>
+      </p>
       <div class="admin-form">
         <input type="file" id="mediaFile" accept="image/*,video/*">
         <button class="btn" onclick="uploadMedia()">Upload</button>
@@ -772,6 +709,7 @@ function loadSection(type) {
       <div id="adminMediaGrid" class="media-admin-grid"><div class="loading" style="grid-column:span 2"><div class="spinner"></div>Loading…</div></div>`;
     loadAdminMediaGrid();
   }
+
   else if (type==='winners') {
     c.innerHTML=`<div class="admin-section-title">🏆 Add Winner</div>
       <div class="admin-form">
@@ -784,6 +722,7 @@ function loadSection(type) {
         <div id="msg"></div>
       </div>`;
   }
+
   else if (type==='admins') {
     c.innerHTML=`<div class="admin-section-title">👤 Add Admin</div>
       <div class="admin-form">
@@ -793,27 +732,33 @@ function loadSection(type) {
         <div id="msg"></div>
       </div>`;
   }
+
   else if (type==='deleteWinner') {
     c.innerHTML=`<div class="admin-section-title">🗑️ Delete Winner</div>
       <div id="deleteWinnerList"><div class="loading"><div class="spinner"></div>Loading…</div></div>
       <div id="msg"></div>`;
     loadDeleteWinnerList();
   }
+
   c.scrollIntoView({ behavior:'smooth' });
 }
 
+/* ─── ADD / UPDATE VENUE (deduplication) ─────────────────── */
 async function addVenue() {
   const name    = document.getElementById('vname').value.trim();
   const info    = document.getElementById('vinfo').value.trim();
   const timings = document.getElementById('vtimings').value.trim();
   if (!name) { showMsg('Enter a venue name', true); return; }
+
   try {
+    // Check for existing venue with same name (case-insensitive)
     const { data: existing } = await sb.from('venues').select('*').ilike('Venue', name);
     if (existing && existing.length > 0) {
+      // Update the first match
       const id = existing[0].id;
       const { error } = await sb.from('venues').update({ "Event Details":info, "Timings":timings }).eq('id', id);
       if (error) throw new Error('Supabase: ' + error.message);
-      showMsg(`Venue "${name}" updated!`);
+      showMsg(`Venue "${name}" already existed — details updated!`);
     } else {
       const { error } = await sb.from('venues').insert([{ "Venue":name, "Event Details":info, "Timings":timings }]);
       if (error) throw new Error('Supabase: ' + error.message);
@@ -822,10 +767,12 @@ async function addVenue() {
     document.getElementById('vname').value='';
     document.getElementById('vinfo').value='';
     document.getElementById('vtimings').value='';
-    loadVenues(); loadAdminVenueList();
+    loadVenues();
+    loadAdminVenueList();
   } catch(err) { showMsg(err.message, true); }
 }
 
+/* ─── ADMIN VENUE LIST (edit + delete) ───────────────────── */
 let _editingVenueId = null;
 async function loadAdminVenueList() {
   const listEl = document.getElementById('adminVenueList');
@@ -847,6 +794,7 @@ async function loadAdminVenueList() {
     </div>`;
   }).join('');
 }
+
 function toggleEditVenue(id, name, info, timings) {
   const el = document.getElementById(`vedit-${id}`);
   if (el.style.display !== 'none') { el.style.display='none'; return; }
@@ -861,6 +809,7 @@ function toggleEditVenue(id, name, info, timings) {
     </div>
   </div>`;
 }
+
 async function saveVenueEdit(id) {
   const name    = document.getElementById(`ve-name-${id}`).value.trim();
   const info    = document.getElementById(`ve-info-${id}`).value.trim();
@@ -869,18 +818,22 @@ async function saveVenueEdit(id) {
   try {
     const { error } = await sb.from('venues').update({ "Venue":name, "Event Details":info, "Timings":timings }).eq('id', id);
     if (error) throw new Error(error.message);
-    loadVenues(); loadAdminVenueList();
+    loadVenues();
+    loadAdminVenueList();
   } catch(err) { alert('Error: ' + err.message); }
 }
+
 async function deleteVenue(id) {
   if (!confirm('Delete this venue?')) return;
   try {
     const { error } = await sb.from('venues').delete().eq('id', id);
     if (error) throw new Error(error.message);
-    loadVenues(); loadAdminVenueList();
+    loadVenues();
+    loadAdminVenueList();
   } catch(err) { alert('Error: ' + err.message); }
 }
 
+/* ─── UPLOAD MEDIA ───────────────────────────────────────── */
 async function uploadMedia() {
   const file = document.getElementById('mediaFile').files[0];
   if (!file) { showMsg('Please select a file first', true); return; }
@@ -893,10 +846,12 @@ async function uploadMedia() {
     await saveMediaItems(arr);
     showMsg('Uploaded successfully!');
     document.getElementById('mediaFile').value='';
-    loadMedia(); loadAdminMediaGrid();
+    loadMedia();
+    loadAdminMediaGrid();
   } catch(err) { showMsg(err.message, true); }
 }
 
+/* ─── ADMIN MEDIA GRID (delete) ──────────────────────────── */
 async function loadAdminMediaGrid() {
   const grid = document.getElementById('adminMediaGrid');
   if (!grid) return;
@@ -919,6 +874,7 @@ async function loadAdminMediaGrid() {
     }).join('');
   } catch(e) { grid.innerHTML='<div class="empty" style="grid-column:span 2">Could not load</div>'; }
 }
+
 async function deleteMediaItem(index) {
   if (!confirm('Delete this highlight?')) return;
   try {
@@ -926,10 +882,12 @@ async function deleteMediaItem(index) {
     const arr = data?.value ? JSON.parse(data.value) : [];
     arr.splice(index, 1);
     await saveMediaItems(arr);
-    loadMedia(); loadAdminMediaGrid();
+    loadMedia();
+    loadAdminMediaGrid();
   } catch(err) { alert('Error: ' + err.message); }
 }
 
+/* ─── WINNERS CRUD ───────────────────────────────────────── */
 async function addWinner() {
   const name     = document.getElementById('winnerName').value.trim();
   const uid      = document.getElementById('winnerUID').value.trim();
@@ -941,7 +899,11 @@ async function addWinner() {
     const { error } = await sb.from('winners').insert([{ "Name":name,"UID":uid,"Department":dept,"Category":category,"Position":position }]);
     if (error) throw new Error('Supabase: '+error.message);
     showMsg('Winner added successfully!');
-    ['winnerName','winnerUID','winnerDept','winnerCategory','winnerPosition'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('winnerName').value='';
+    document.getElementById('winnerUID').value='';
+    document.getElementById('winnerDept').value='';
+    document.getElementById('winnerCategory').value='';
+    document.getElementById('winnerPosition').value='';
     loadWinners();
   } catch(err) { showMsg(err.message, true); }
 }
@@ -960,6 +922,7 @@ async function loadDeleteWinnerList() {
     </div>`;
   }).join('');
 }
+
 async function deleteWinner(id) {
   if (!confirm('Delete this winner?')) return;
   try {
@@ -968,6 +931,7 @@ async function deleteWinner(id) {
     loadWinners(); loadDeleteWinnerList(); showMsg('Winner deleted');
   } catch(err) { showMsg(err.message, true); }
 }
+
 async function addAdmin() {
   const name = document.getElementById('newAdmin').value.trim();
   const pass = document.getElementById('newPass').value.trim();
@@ -982,15 +946,20 @@ async function addAdmin() {
 }
 
 /* ─── INITIAL LOAD ───────────────────────────────────────── */
-loadLogo(); loadVenues(); loadWinners(); loadMedia();
+loadLogo();
+loadVenues();
+loadWinners();
+loadMedia();
 
 /* ─── REAL-TIME SUBSCRIPTIONS ────────────────────────────── */
 sb.channel('realtime-winners')
   .on('postgres_changes', { event:'*', schema:'public', table:'winners' }, () => loadWinners())
   .subscribe();
+
 sb.channel('realtime-venues')
   .on('postgres_changes', { event:'*', schema:'public', table:'venues' }, () => loadVenues())
   .subscribe();
+
 sb.channel('realtime-settings')
   .on('postgres_changes', { event:'*', schema:'public', table:'settings' }, (payload) => {
     if (payload.new?.id==='media_urls') loadMedia();
