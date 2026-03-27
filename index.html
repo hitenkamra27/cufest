@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#f0c040">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CU FEST</title>
@@ -827,13 +825,6 @@ sb.channel('realtime-settings')
     if (payload.new?.id === 'logo_url')   loadLogo();
   })
   .subscribe();
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js")
-    .then(() => console.log("SW registered"))
-    .catch(err => console.log("SW error", err));
-}
 </script>
 </body>
 </html>
