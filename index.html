@@ -175,7 +175,7 @@ body{background:var(--bg);display:flex;justify-content:center;font-family:'DM Sa
 
   <!-- SPLASH -->
   <div id="splash">
-    <div class="splash-logo" id="splashLogo">CU</div>
+    <div class="splash-logo" id="splashLogo"></div>
     <div class="splash-title">CU FEST</div>
     <div class="splash-sub">University Festival</div>
     <div class="progress-track"><div class="progress-fill"></div></div>
@@ -544,7 +544,7 @@ async function saveMediaItems(items) {
 }
 
 /* WINNERS with clickable detail card */
-const medals=['🥇','🥈','🥉'];
+const medals=['🎖️','🎖️','🎖️'];
 let _winnersData=[];
 async function loadWinners() {
   const list=document.getElementById('winnerList');
