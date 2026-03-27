@@ -353,14 +353,8 @@ const SUPABASE_ANON     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const SHEET_URL         = "https://opensheet.elk.sh/12gNBBNZpqbkVyKJBzEQUwF-HXu1moQjXBE7SyezUt8k/Sheet1";
 const CLOUDINARY_CLOUD  = "dyt6iai2c";
 
-/*
-  ── CLOUDINARY PRESET ──
-  Name set exactly as in your Cloudinary dashboard.
-  IMPORTANT: In Cloudinary → Settings → Upload → Upload Presets
-  → find "CU FEST UPLOAD" → click Edit → set Signing Mode to UNSIGNED
-  Without this, uploads will be rejected.
-*/
-const CLOUDINARY_PRESET = "CU FEST UPLOAD";
+/* ── FIX 1: Cloudinary preset updated (underscore, no space) ── */
+const CLOUDINARY_PRESET = "CU_FEST_UPLOAD";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -406,13 +400,12 @@ function showMsg(text, isError = false) {
 }
 
 /* ══════════════════════════
-   CLOUDINARY — unsigned upload (NO api_key needed)
+   CLOUDINARY — unsigned upload
 ══════════════════════════ */
 async function uploadToCloudinary(file) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
-  /* Do NOT include api_key for unsigned presets */
 
   const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
   const data = await res.json();
@@ -556,9 +549,8 @@ setInterval(loadLeaderboard, 10000);
 
 /* ══════════════════════════
    VENUES
-   ── Stores full data in window._venuesData
-   ── Opens detail by numeric id
-   ── Handles both "Venue" and "venue" column casing
+   ── FIX 2: Removed .order('created_at') — column may not exist
+   ── Falls back gracefully, tries both column name casings
 ══════════════════════════ */
 window._venuesData = [];
 
@@ -566,7 +558,8 @@ async function loadVenues() {
   const list = document.getElementById('venueList');
   list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading venues…</div>';
 
-  const { data, error } = await sb.from('venues').select('*').order('created_at', { ascending: false });
+  /* ── Select all columns, no ordering by created_at ── */
+  const { data, error } = await sb.from('venues').select('*');
 
   if (error) {
     list.innerHTML = `<div class="empty"><div class="e-icon">⚠️</div>${escHtml(error.message)}<br>
@@ -585,7 +578,8 @@ async function loadVenues() {
   window._venuesData = data;
 
   list.innerHTML = data.map(v => {
-    const name    = v["Venue"]   || v["venue"]   || 'Unnamed';
+    /* Handle both capitalised and lowercase column names */
+    const name    = v["Venue"]   || v["venue"]   || v["name"]    || 'Unnamed';
     const timings = v["Timings"] || v["timings"] || '';
     return `
       <div class="venue-card" onclick="openVenue(${v.id})">
@@ -602,8 +596,8 @@ function openVenue(id) {
   const v = window._venuesData.find(x => x.id === id);
   if (!v) return;
 
-  const venueName    = v["Venue"]         || v["venue"]         || '';
-  const eventDetails = v["Event Details"] || v["event_details"] || '';
+  const venueName    = v["Venue"]         || v["venue"]         || v["name"]          || '';
+  const eventDetails = v["Event Details"] || v["event_details"] || v["details"]       || '';
   const timings      = v["Timings"]       || v["timings"]       || '';
 
   document.getElementById('venueTitle').textContent = venueName;
@@ -661,8 +655,8 @@ async function saveMediaUrls(urls) {
 
 /* ══════════════════════════
    WINNERS
-   ── Handles both capitalised and lowercase column names
-   ── No broken template literal typos
+   ── FIX 3: Removed .order('created_at') — column does not exist
+   ── Uses .select('*') only, no ordering
 ══════════════════════════ */
 const medals = ['🥇','🥈','🥉'];
 
@@ -670,7 +664,8 @@ async function loadWinners() {
   const list = document.getElementById('winnerList');
   list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading winners…</div>';
 
-  const { data, error } = await sb.from('winners').select('*').order('created_at', { ascending: true });
+  /* ── No order('created_at') — that column doesn't exist ── */
+  const { data, error } = await sb.from('winners').select('*');
 
   if (error) {
     list.innerHTML = `<div class="empty"><div class="e-icon">⚠️</div>${escHtml(error.message)}<br>
@@ -687,6 +682,7 @@ async function loadWinners() {
   }
 
   list.innerHTML = data.map((w, i) => {
+    /* Handle both capitalised and lowercase column names */
     const name     = w["Name"]       || w["name"]       || '';
     const uid      = w["UID"]        || w["uid"]        || '';
     const dept     = w["Department"] || w["department"] || '';
@@ -801,7 +797,7 @@ function loadSection(type) {
     c.innerHTML = `
       <div class="admin-section-title">🎬 Upload Highlight Photo</div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
-        Preset: <strong style="color:var(--accent)">CU FEST UPLOAD</strong><br>
+        Preset: <strong style="color:var(--accent)">CU_FEST_UPLOAD</strong><br>
         ⚠️ Must be set to <strong>Unsigned</strong> in Cloudinary dashboard<br>
         (Settings → Upload → Upload Presets → Edit → Signing Mode: Unsigned)
       </p>
@@ -915,7 +911,8 @@ async function addWinner() {
 
 /* ── Delete Winner ── */
 async function loadDeleteWinnerList() {
-  const { data, error } = await sb.from('winners').select('*').order('created_at', { ascending: true });
+  /* ── No order('created_at') ── */
+  const { data, error } = await sb.from('winners').select('*');
   const list = document.getElementById('deleteWinnerList');
   if (error || !data?.length) { list.innerHTML = '<div class="empty">No winners to delete</div>'; return; }
   list.innerHTML = data.map((w, i) => {
