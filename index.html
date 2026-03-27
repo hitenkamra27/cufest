@@ -409,7 +409,7 @@ async function uploadLogo() {
 let allTeams = [];
 async function loadLeaderboard() {
   try {
-    const res  = await fetch(SHEET_URL + '?_=' + Date.now()); // bust cache
+    const res  = await fetch(SHEET_URL, { cache: 'no-store' });
     const data = await res.json();
     const grouped = {};
     data.forEach(row => {
@@ -468,7 +468,7 @@ function searchTeam() {
   renderBoard(q ? allTeams.filter(t=>t.name.toLowerCase().includes(q)) : allTeams);
 }
 function openDetails(name) {
-  fetch(SHEET_URL + '?_=' + Date.now()).then(r=>r.json()).then(data=>{
+  fetch(SHEET_URL, { cache: 'no-store' }).then(r=>r.json()).then(data=>{
     const filtered = data.filter(d=>(d.Department||'').trim()===name);
     let total=0, html='';
     filtered.forEach(item=>{
